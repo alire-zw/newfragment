@@ -9,7 +9,7 @@ module.exports = {
   zibal: {
     // Sandbox configuration (for development/testing)
     sandbox: {
-      merchant: 'zibal',
+      merchant: '68a6457ea45c72001333cc4a',
       baseUrl: 'https://gateway.zibal.ir/v1',
       startUrl: 'https://gateway.zibal.ir/start'
     },
