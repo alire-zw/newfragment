@@ -1,0 +1,845 @@
+@font-face {
+  font-family: 'IRANYekanX';
+  src: url('/fonts/IRANYekanMobileRegular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.container {
+  background: var(--background);
+  min-height: 100vh;
+  font-family: 'IRANYekanX', tahoma, Arial, sans-serif;
+  direction: rtl;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  padding-bottom: 80px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 11px 16px 0 16px;
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+  transform: scaleX(-1);
+  /* حذف highlight آبی در اندروید */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.backButton:hover {
+  background: var(--inactive-color);
+}
+
+.backButton:active {
+  background: var(--bg-hover-color);
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--field-color);
+  margin: 0;
+  text-align: center;
+  flex: 1;
+}
+
+.flexSpacer {
+  width: 40px;
+}
+
+.formBox {
+  background: var(--field-bg-color);
+  border-radius: 12px;
+  margin: 0 16px 16px 16px;
+  padding: 16px;
+}
+
+.boxHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.boxTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--field-color);
+  margin: 0;
+}
+
+.addButton {
+  background: var(--btn-primary-bg-color);
+  color: var(--btn-primary-color);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: 'IRANYekanX', tahoma, Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.addButton:hover {
+  background: var(--btn-primary-bg-hover-color);
+}
+
+.addButton:active {
+  transform: scale(0.98);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.emptyText {
+  color: var(--field-second-color);
+  font-size: 14px;
+  margin-top: 12px;
+  margin: 0;
+}
+
+.accountsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.accountCard {
+  background: var(--background);
+  border: 1px solid var(--inactive-color);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.accountCard:hover {
+  border-color: var(--accent-color);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cardTypeSection {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cardTypeLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent-color);
+}
+
+.deleteButton {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deleteButton:hover {
+  background: var(--danger-text-color);
+}
+
+.deleteButton:hover svg {
+  color: white;
+}
+
+.accountInfo {
+  flex: 1;
+}
+
+.cardNumber {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--field-color);
+  margin-bottom: 4px;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+  direction: ltr;
+  text-align: left;
+}
+
+.cardDetails {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin-top: 8px;
+  gap: 16px;
+}
+
+.detailLeft, .detailRight {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detailLabel {
+  font-size: 11px;
+  color: var(--field-second-color);
+  font-weight: 500;
+}
+
+.detailValue {
+  font-size: 12px;
+  color: #dadada;
+  font-weight: 400;
+}
+
+.accountDetails {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bankName {
+  color: var(--field-second-color);
+  font-size: 12px;
+}
+
+.defaultBadge {
+  background: var(--accent-color);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.accountStatus {
+  display: flex;
+  align-items: center;
+}
+
+.status {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.status.active {
+  color: #22c55e;
+}
+
+.status.inactive {
+  color: #f59e0b;
+}
+
+.status.suspended {
+  color: #ef4444;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--field-color);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.savedInfo {
+  font-size: 12px;
+  color: var(--accent-color);
+  font-weight: 400;
+}
+
+.disabled {
+  background-color: var(--field-disabled-bg-color) !important;
+  color: var(--field-disabled-text-color) !important;
+  cursor: not-allowed !important;
+  opacity: 0.7 !important;
+}
+
+.savedMessage {
+  font-size: 12px;
+  color: var(--accent-color);
+  font-weight: 400;
+  margin-top: 4px;
+  display: block;
+}
+
+.required {
+  color: var(--danger-text-color);
+  font-weight: 600;
+}
+
+.fieldInput {
+  background: var(--field-bg-color);
+  border: 1px solid var(--inactive-color);
+  border-radius: 8px;
+  padding: 10px 16px;
+  color: var(--field-color);
+  font-size: 14px;
+  font-family: 'IRANYekanX', tahoma, Arial, sans-serif;
+  direction: ltr;
+  text-align: center;
+  transition: border-color 0.2s, background-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+  height: 40px;
+}
+
+.fieldInput:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  background: var(--field-bg-color);
+}
+
+.fieldInput::placeholder {
+  color: var(--field-placeholder-color);
+  font-size: 13px;
+}
+
+.cardInputs {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cardInput {
+  background: var(--field-bg-color);
+  border: 1px solid var(--inactive-color);
+  border-radius: 8px;
+  padding: 8px 6px;
+  color: var(--field-color);
+  font-size: 14px;
+  font-family: 'IRANYekanX', tahoma, Arial, sans-serif;
+  direction: ltr;
+  text-align: center;
+  transition: border-color 0.2s, background-color 0.2s;
+  flex: 1;
+  box-sizing: border-box;
+  height: 40px;
+  min-width: 0;
+  width: 100%;
+}
+
+.cardInput:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  background: var(--field-bg-color);
+}
+
+.cardInput::placeholder {
+  color: var(--field-placeholder-color);
+  font-size: 12px;
+}
+
+.cardInput.error {
+  border-color: var(--danger-text-color);
+  background: var(--danger-bg-color);
+}
+
+.cardInput.error:focus {
+  border-color: var(--danger-text-color);
+  background: var(--danger-bg-color);
+}
+
+.dateInputs {
+  display: flex;
+  gap: 8px;
+}
+
+.dateInput {
+  background: var(--field-bg-color);
+  border: 1px solid var(--inactive-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--field-color);
+  font-size: 14px;
+  font-family: 'IRANYekanX', tahoma, Arial, sans-serif;
+  direction: ltr;
+  text-align: center;
+  transition: border-color 0.2s, background-color 0.2s;
+  box-sizing: border-box;
+  height: 40px;
+}
+
+.yearInput {
+  flex: 2;
+  min-width: 80px;
+}
+
+.monthInput {
+  flex: 1;
+  min-width: 50px;
+}
+
+.dayInput {
+  flex: 1;
+  min-width: 50px;
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  background: var(--field-bg-color);
+}
+
+.dateInput::placeholder {
+  color: var(--field-placeholder-color);
+  font-size: 12px;
+}
+
+.dateInput.error {
+  border-color: var(--danger-text-color);
+  background: var(--danger-bg-color);
+}
+
+.dateInput.error:focus {
+  border-color: var(--danger-text-color);
+  background: var(--danger-bg-color);
+}
+
+.fieldInput.error {
+  border-color: var(--danger-text-color);
+  background: var(--danger-bg-color);
+}
+
+.fieldInput.error:focus {
+  border-color: var(--danger-text-color);
+  background: var(--danger-bg-color);
+}
+
+.errorMessage {
+  font-size: 12px;
+  color: var(--danger-text-color);
+  margin: 0;
+  font-weight: 400;
+}
+
+.submitButton {
+  background: var(--btn-primary-bg-color);
+  color: var(--btn-primary-color);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  font-family: 'IRANYekanX', tahoma, Arial, sans-serif;
+  margin-top: 8px;
+  height: 40px;
+  /* حذف highlight آبی در اندروید */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: var(--btn-primary-bg-hover-color);
+}
+
+.submitButton:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.submitButton:disabled {
+  background: var(--btn-primary-disabled-color);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.submitButton:disabled:hover {
+  background: var(--btn-primary-disabled-color);
+  transform: none;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: var(--field-color);
+  font-size: 16px;
+}
+
+/* Custom Notification Styles */
+.notification {
+  position: fixed;
+  top: -100px;
+  left: 12px;
+  right: 12px;
+  background: var(--field-bg-color);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--inactive-color);
+  color: var(--field-color);
+  padding: 10px 13px;
+  border-radius: 15px;
+  font-size: 14px;
+  font-weight: 400;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  direction: rtl;
+  font-family: 'IRANYekanX', tahoma, Arial, sans-serif;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  pointer-events: auto;
+  transform: translateY(-20px) scale(0.95);
+  opacity: 0;
+  /* حذف highlight آبی در اندروید */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.notification:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+}
+
+.notification:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.notification.show {
+  top: 20px;
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  animation: slideInFromTop 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInFromTop {
+  0% {
+    transform: translateY(-20px) scale(0.95);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(5px) scale(1.02);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToTop {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-30px) scale(0.9);
+    opacity: 0;
+  }
+}
+
+.notification.hide {
+  animation: slideOutToTop 0.4s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.notification.hiding {
+  animation: slideOutToTop 0.4s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* Special positioning for Telegram WebApp */
+.notification.telegram {
+  top: 10px;
+}
+
+.notification.telegram.show {
+  top: 10px;
+}
+
+.notification::before {
+  content: '';
+  position: absolute;
+  right: 16px;
+  top: 12px;
+  bottom: 12px;
+  width: 4px;
+  background: var(--accent-color);
+  border-radius: 2px;
+}
+
+.notificationContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  margin-right: 16px;
+  text-align: right;
+}
+
+.notificationTitle {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--accent-color);
+  margin: 0;
+  text-align: right;
+}
+
+.notificationMessage {
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--field-second-color);
+  margin: 0;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.notification.error::before {
+  background: var(--danger-text-color);
+}
+
+.notification.error .notificationTitle {
+  color: var(--danger-text-color);
+}
+
+.notification.info::before {
+  background: var(--accent-color);
+}
+
+.notification.info .notificationTitle {
+  color: var(--accent-color);
+}
+
+.notification.warning::before {
+  background: var(--warning-text-color);
+}
+
+.notification.warning .notificationTitle {
+  color: var(--warning-text-color);
+}
+
+/* Success Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.modalContent {
+  background: var(--field-bg-color);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  max-width: 320px;
+  width: 100%;
+  border: 1px solid var(--inactive-color);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modalIcon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-bg-color);
+  border-radius: 50%;
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--field-color);
+  margin: 0 0 12px 0;
+}
+
+.modalMessage {
+  font-size: 14px;
+  color: var(--field-second-color);
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.modalButton {
+  background: var(--btn-primary-bg-color);
+  color: var(--btn-primary-color);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: 'IRANYekanX', tahoma, Arial, sans-serif;
+  width: 100%;
+  /* حذف highlight آبی در اندروید */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.modalButton:hover {
+  background: var(--btn-primary-bg-hover-color);
+}
+
+.modalButton:active {
+  transform: scale(0.98);
+}
+
+.modalButtons {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.modalButtonSecondary {
+  background: var(--field-color);
+  color: var(--field-second-color);
+  border: 1px solid var(--field-border-color);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+  font-family: 'IRANYekanX', tahoma, Arial, sans-serif;
+}
+
+.modalButtonSecondary:hover {
+  background: var(--field-hover-color);
+  border-color: var(--accent-color);
+}
+
+.modalButtonDanger {
+  background: var(--danger-text-color);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+  font-family: 'IRANYekanX', tahoma, Arial, sans-serif;
+}
+
+.modalButtonDanger:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+.modalSubMessage {
+  color: var(--field-second-color);
+  font-size: 14px;
+  margin-top: 8px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* Responsive for mobile */
+@media (max-width: 480px) {
+  .header {
+    padding: 11px 16px 0 16px;
+  }
+  
+  .cardInputs {
+    gap: 4px;
+  }
+  
+  .cardInput {
+    padding: 6px 4px;
+    font-size: 13px;
+  }
+  
+  .dateInputs {
+    gap: 4px;
+  }
+  
+  .dateInput {
+    padding: 6px 4px;
+    font-size: 13px;
+  }
+  
+  .formBox {
+    margin: 0 16px 16px 16px;
+    padding: 16px;
+  }
+}

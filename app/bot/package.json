@@ -1,0 +1,25 @@
+{
+  "name": "franumbot-telegram-bot",
+  "version": "1.0.0",
+  "description": "Telegram Bot for FranumBot Mini App",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "telegraf": "^4.15.6",
+    "mysql2": "^3.6.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "mini-app",
+    "referral"
+  ],
+  "author": "Alireza Mirhosseini",
+  "license": "MIT"
+}

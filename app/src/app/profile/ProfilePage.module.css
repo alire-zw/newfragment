@@ -1,0 +1,654 @@
+@font-face {
+  font-family: 'IRANYekanX';
+  src: url('/fonts/IRANYekanMobileRegular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.container {
+  background: var(--background);
+  min-height: 100vh;
+  font-family: 'IRANYekanX', tahoma, Arial, sans-serif;
+  direction: rtl;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  padding-bottom: 80px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 11px 16px 0 16px;
+  position: relative;
+}
+
+.profileInfo {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  margin-top: 0;
+  gap: 0;
+}
+
+.profileText {
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  direction: rtl;
+  margin-right: 8px;
+  gap: 6px;
+}
+
+.name {
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--field-color);
+  margin: 0;
+  direction: rtl;
+  text-align: right;
+}
+
+.userIdRow {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.userId {
+  font-size: 12px;
+  color: var(--field-second-color);
+  margin: 0;
+  margin-top: 5px;
+  direction: rtl;
+  text-align: right;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.copyIcon {
+  font-size: 12px;
+  cursor: pointer;
+  margin-right: 4px;
+  vertical-align: baseline;
+  position: relative;
+  top: -1px;
+  color: var(--field-second-color);
+  transition: color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* حذف highlight آبی در اندروید */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* iOS specific adjustments */
+@supports (-webkit-appearance: none) {
+  .copyIcon {
+    top: -2px;
+  }
+}
+
+.copyIcon:hover {
+  color: var(--field-color);
+}
+
+.copyIcon:active {
+  color: var(--field-color);
+}
+
+.avatarBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatar {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1.5px solid var(--inactive-color);
+  width: 56px;
+  height: 56px;
+  box-shadow: none;
+}
+
+.goldBadge {
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 15px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: none;
+  border: 1px solid transparent;
+  text-align: center;
+}
+
+.verificationBadge {
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+  text-align: center;
+  font-family: 'IRANYekanX', tahoma, Arial, sans-serif;
+}
+
+
+.referralBox {
+  background: var(--field-bg-color);
+  border-radius: 12px;
+  margin: 16px 16px 0 16px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.referralTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--field-color);
+  text-align: center;
+  margin: 0;
+}
+
+.referralStats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.referralStat {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: var(--inactive-color);
+  border-radius: 8px;
+  gap: 6px;
+  min-height: 32px;
+}
+
+.referralStatIcon {
+  width: 19px;
+  height: 19px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  flex-shrink: 0;
+}
+
+.referralStatIcon.people {
+  color: #ff69b4;
+}
+
+.referralStatIcon.transactions {
+  color: #8a2be2;
+}
+
+.referralStatIcon.rewards {
+  color: #ffc107;
+}
+
+.referralStatIcon.percent {
+  color: #28a745;
+}
+
+.referralStatContent {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.referralStatLabel {
+  font-size: 14px;
+  color: var(--field-color);
+  text-align: right;
+  margin: 0;
+  flex: 1;
+}
+
+.referralStatValue {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--field-color);
+  text-align: left;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.referralLinkSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.referralLinkLabel {
+  font-size: 9px;
+  color: var(--field-color);
+  text-align: right;
+}
+
+.referralLinkContainer {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.referralLinkInput {
+  flex: 1;
+  background: var(--inactive-color);
+  border: 1px solid var(--inactive-color);
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: var(--field-color);
+  font-size: 10px;
+  font-family: 'IRANYekanX', tahoma, Arial, sans-serif;
+  direction: ltr;
+  text-align: left;
+  height: 28px;
+}
+
+.referralLinkInput:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.referralCopyButton {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: 'IRANYekanX', tahoma, Arial, sans-serif;
+  height: 28px;
+}
+
+.referralCopyButton:hover {
+  background: #3a9eff;
+}
+
+.referralCopyButton:active {
+  background: #2d8ce6;
+}
+
+.actionBox {
+  background: var(--field-bg-color);
+  border-radius: 12px;
+  margin: 16px 16px 0 16px;
+  padding: 12px;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.actionButton {
+  flex: 1;
+  background: var(--inactive-color);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: var(--field-color);
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: 'IRANYekanX', tahoma, Arial, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+}
+
+.actionButton:hover {
+  background: var(--bg-hover-color);
+}
+
+.actionButton:active {
+  background: var(--inactive-color);
+}
+
+.menuBox {
+  background: var(--field-bg-color);
+  border-radius: 12px;
+  margin: 16px 16px 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+
+.menuList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px;
+  font-size: 14px;
+  color: var(--field-color);
+  cursor: pointer;
+  transition: background 0.2s;
+  background: transparent;
+  min-height: 40px;
+  /* حذف highlight آبی در اندروید */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.menuItem:last-child {
+  border-bottom: none;
+}
+
+.menuItemDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+
+.menuItemStart {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menuItemEnd {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  flex-shrink: 0;
+}
+
+.menuIcon {
+  font-size: 19px;
+  width: 19px;
+  height: 19px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--field-color);
+}
+
+.menuText {
+  font-size: 14px;
+  color: var(--field-color);
+}
+
+.arrow {
+  color: var(--field-second-color);
+  font-size: 14px;
+  font-family: tahoma;
+  transform: scaleX(-1);
+}
+
+.badge {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-weight: 500;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  max-height: 18px;
+  flex-shrink: 0;
+}
+
+.badge.red {
+  background: #ffebee;
+  color: #d32f2f;
+  border: 1px solid #ffcdd2;
+}
+
+
+.flexSpacer {
+  flex: 1;
+}
+
+.footer {
+  text-align: center;
+  padding: 20px 16px;
+  margin-top: auto;
+  position: sticky;
+  bottom: 0;
+  background: var(--background);
+}
+
+.footer p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--field-second-color);
+  font-weight: 300;
+}
+
+.footer a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+.heartBeat {
+  display: inline-block;
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.2);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.2);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
+.menuDivider {
+  height: 1px;
+  background: var(--inactive-color);
+  margin: 0 20px;
+}
+
+/* Custom Notification Styles */
+.notification {
+  position: fixed;
+  top: -100px;
+  left: 12px;
+  right: 12px;
+  background: var(--field-bg-color);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--inactive-color);
+  color: var(--field-color);
+  padding: 10px 13px;
+  border-radius: 15px;
+  font-size: 14px;
+  font-weight: 400;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  direction: rtl;
+  font-family: 'IRANYekanX', tahoma, Arial, sans-serif;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  pointer-events: auto;
+  transform: translateY(-20px) scale(0.95);
+  opacity: 0;
+  /* حذف highlight آبی در اندروید */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.notification:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+}
+
+.notification:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.notification.show {
+  top: 20px;
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  animation: slideInFromTop 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInFromTop {
+  0% {
+    transform: translateY(-20px) scale(0.95);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(5px) scale(1.02);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToTop {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-30px) scale(0.9);
+    opacity: 0;
+  }
+}
+
+.notification.hide {
+  animation: slideOutToTop 0.4s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* Special positioning for Telegram WebApp */
+.notification.telegram {
+  top: 10px;
+}
+
+.notification.telegram.show {
+  top: 10px;
+}
+
+.notification::before {
+  content: '';
+  position: absolute;
+  right: 16px;
+  top: 12px;
+  bottom: 12px;
+  width: 4px;
+  background: var(--accent-color);
+  border-radius: 2px;
+}
+
+.notificationContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  margin-right: 16px;
+  text-align: right;
+}
+
+.notificationTitle {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--accent-color);
+  margin: 0;
+  text-align: right;
+}
+
+.notificationMessage {
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--field-second-color);
+  margin: 0;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.notification.error::before {
+  background: var(--danger-text-color);
+}
+
+.notification.error .notificationTitle {
+  color: var(--danger-text-color);
+}
+
+.notification.info::before {
+  background: var(--accent-color);
+}
+
+.notification.info .notificationTitle {
+  color: var(--accent-color);
+}
+
+.notification.warning::before {
+  background: var(--warning-text-color);
+}
+
+.notification.warning .notificationTitle {
+  color: var(--warning-text-color);
+}
+

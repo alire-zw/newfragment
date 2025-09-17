@@ -1,0 +1,294 @@
+@import "tailwindcss";
+@import "../styles/fonts.css";
+
+@font-face {
+  font-family: 'ProductSansRegular';
+  src: url('/fonts/ProductSansRegular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'ProductSans';
+  src: url('/fonts/ProductSansRegular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  --background: #1a2026;
+  --foreground: #ffffff;
+  --header-bg: #202931;
+  
+  /* Design System Variables */
+  --text-color: #8794a1;
+  --accent-color: #4db2ff;
+  --accent-rgb: 77, 178, 255;
+  --accent-bg-color: rgba(var(--accent-rgb), .1);
+  --dropdown-color: #dde4eb;
+  --dropdown-bg-color: #2e3a47;
+  --dropdown-bg-hover-color: #384553;
+  --dropdown-secondary-color: #8c9aa9;
+  --article-color: #fff;
+  --dropdown-color: #fff;
+  --header-color: #fff;
+  --field-color: #fff;
+  --field-bg-color: #242e38;
+  --field-second-color: #8494a3;
+  --field-placeholder-color: #8a98a6;
+  --field-accent-color: #248bda;
+  --btn-primary-color: #fff;
+  --btn-primary-bg-rgb: 36, 139, 218;
+  --btn-primary-bg-color: rgb(var(--btn-primary-bg-rgb));
+  --btn-primary-bg-hover-color: #207cc2;
+  --btn-primary-disabled-color: #a6d8ff;
+  --btn-default-color: #fff;
+  --btn-default-bg-color: #242e38;
+  --btn-default-bg-hover-color: #293440;
+  --btn-header-color: #fff;
+  --btn-header-bg-rgb: 41, 52, 64;
+  --btn-header-bg-color: rgb(var(--btn-header-bg-rgb));
+  --btn-header-bg-hover-rgb: 63, 78, 96;
+  --btn-header-bg-hover-color: rgb(var(--btn-header-bg-hover-rgb));
+  --table-bg-rgb: 33, 42, 51;
+  --table-bg-color: rgb(var(--table-bg-rgb));
+  --table-header-bg-color: #293440;
+  --table-bg-hover-color: #293440;
+  --table-text-color: #8c9aa9;
+  --filters-header-bg-color: #28323d;
+  --filters-icon-color: #838f9c;
+  --value-color: #fff;
+  --header-height: 112px;
+  --def-border-radius: 8px;
+  --min-border-radius: 3px;
+  --popup-border-radius: 12px;
+  --bg-rgb: 26, 32, 38;
+  --bg-color: rgb(var(--bg-rgb));
+  --header-bg-rgb: 33, 42, 51;
+  --header-bg-color: rgb(var(--header-bg-rgb));
+  --bg-hover-color: #212a33;
+  --def-transition-duration: .2s;
+  --def-transition: var(--def-transition-duration) ease;
+  --first-half-transition: .1s ease-out;
+  --second-half-transition: .1s ease-in .1s;
+  --half-transition-duration: .15s;
+  --settings-bg-rgb: var(--header-bg-rgb);
+  --settings-bg-color: rgb(var(--settings-bg-rgb));
+  --settings-bg-hover-color: #293440;
+  --inactive-bg-color: #212a33;
+  --inactive-color: #354352;
+  --footer-bg-color: #111417;
+  --footer-color: #6d8394;
+  --footer-bg-color: #111417;
+  --tooltip-bg-color: #2d3c4c;
+  --tooltip-color: #fff;
+  --header-tab-color-rgb: 203, 215, 229;
+  --header-tab-color-active: #fff;
+  --unavail-color-rgb: 255, 88, 99;
+  --unavail-color: rgb(var(--unavail-color-rgb));
+  --danger-color-rgb: 255, 88, 99;
+  --danger-bg-color: rgba(var(--danger-color-rgb), .14);
+  --danger-text-color: rgb(var(--danger-color-rgb));
+  --warning-color-rgb: 255, 153, 83;
+  --warning-bg-color: rgba(var(--warning-color-rgb), .14);
+  --warning-text-color: rgb(var(--warning-color-rgb));
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-header-bg: var(--header-bg);
+  --font-family-sans: 'IRANYekan', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+* {
+  font-family: 'IRANYekan', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'IRANYekan', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* جلوگیری از zoom در موبایل */
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* جلوگیری از zoom در موبایل */
+html {
+  -webkit-text-size-adjust: 100% !important;
+  -ms-text-size-adjust: 100% !important;
+  text-size-adjust: 100% !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -khtml-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  touch-action: manipulation !important;
+  -ms-touch-action: manipulation !important;
+}
+
+body {
+  -webkit-text-size-adjust: 100% !important;
+  -ms-text-size-adjust: 100% !important;
+  text-size-adjust: 100% !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -khtml-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  touch-action: manipulation !important;
+  -ms-touch-action: manipulation !important;
+  -webkit-overflow-scrolling: touch !important;
+  overflow-scrolling: touch !important;
+}
+
+/* جلوگیری از zoom با CSS */
+* {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -khtml-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  touch-action: manipulation !important;
+  -ms-touch-action: manipulation !important;
+}
+
+/* اجازه انتخاب متن در input ها */
+input, textarea, [contenteditable] {
+  -webkit-user-select: text !important;
+  -khtml-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default !important;
+}
+
+/* جلوگیری از zoom در تمام صفحات */
+@media screen and (max-width: 768px) {
+  html, body {
+    -webkit-text-size-adjust: 100% !important;
+    -ms-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -khtml-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    touch-action: manipulation !important;
+    -ms-touch-action: manipulation !important;
+  }
+}
+
+/* Hide number input spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Custom Radio Button Styles */
+@supports(-webkit-appearance: none) or (-moz-appearance: none) {
+  input[type='checkbox'],
+  input[type='radio'] {
+    --active: #248bda;
+    --active-inner: #fff;
+    --focus: 2px rgba(36, 139, 218, .3);
+    --border: #6b7280;
+    --border-hover: #248bda;
+    --background: transparent;
+    --disabled: #F6F8FF;
+    --disabled-inner: #E1E6F9;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    height: 12px;
+    width: 12px;
+    outline: none;
+    display: inline-block;
+    vertical-align: top;
+    position: relative;
+    margin: 0;
+    cursor: pointer;
+    border: 2px solid var(--bc, var(--border));
+    background: var(--b, var(--background));
+    transition: background .3s, border-color .3s, box-shadow .2s;
+  }
+  
+  input[type='checkbox']:after,
+  input[type='radio']:after {
+    content: '';
+    display: block;
+    left: 0;
+    top: 0;
+    position: absolute;
+    transition: transform var(--d-t, .3s) var(--d-t-e, ease), opacity var(--d-o, .2s);
+  }
+  
+  input[type='checkbox']:checked,
+  input[type='radio']:checked {
+    --b: var(--active);
+    --bc: var(--active);
+    --d-o: .3s;
+    --d-t: .6s;
+    --d-t-e: cubic-bezier(.2, .85, .32, 1.2);
+  }
+  
+  input[type='checkbox']:disabled,
+  input[type='radio']:disabled {
+    --b: var(--disabled);
+    cursor: not-allowed;
+    opacity: .9;
+  }
+  
+  input[type='checkbox']:disabled:checked,
+  input[type='radio']:disabled:checked {
+    --b: var(--disabled-inner);
+    --bc: var(--border);
+  }
+  
+  input[type='checkbox']:hover:not(:checked):not(:disabled),
+  input[type='radio']:hover:not(:checked):not(:disabled) {
+    --bc: var(--border-hover);
+  }
+  
+  input[type='checkbox']:focus,
+  input[type='radio']:focus {
+    box-shadow: 0 0 0 var(--focus);
+  }
+  
+  input[type='radio'] {
+    border-radius: 50%;
+  }
+  
+  input[type='radio']:after {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--active-inner);
+    opacity: 0;
+    transform: scale(var(--s, .7));
+    left: 2px;
+    top: 2px;
+  }
+  
+  input[type='radio']:checked {
+    --s: .5;
+  }
+}
