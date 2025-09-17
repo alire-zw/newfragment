@@ -1,17 +1,17 @@
 const botConfig = {
   // تنظیمات ربات تلگرام
-  botToken: process.env.BOT_TOKEN || '8228019728:AAGwn74rjv1MCmFymz5fJ7Q2PnSxE9Lt2Vk',
+  botToken: process.env.BOT_TOKEN || '8200827364:AAGVkmbDAHNBrIY31deTelKzbQ1Rob5Y2KE',
   botUsername: process.env.BOT_USERNAME || 'FragmentParsiBot',
   
   // تنظیمات مینی اپ
   miniAppName: 'FragmentFarsi',
-  miniAppUrl: process.env.MINI_APP_URL || 'https://clever-bluejay-charmed.ngrok-free.app',
+  miniAppUrl: process.env.MINI_APP_URL || 'https://app.numberstar.shop',
   
   // تنظیمات دیتابیس
   database: {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
+    password: process.env.DB_PASSWORD || 'Alireza1380#',
     database: process.env.DB_NAME || 'franumbot_db'
   },
   

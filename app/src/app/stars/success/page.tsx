@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import StarIcon from '../../../../public/icons/star-component';
 import Cash01Icon from '../../../../public/icons/cash-01-stroke-rounded';
 import CheckmarkIcon from '../../../../public/icons/checkmark-icon';
@@ -24,7 +24,7 @@ interface TransactionState {
   timestamp: number;
 }
 
-export default function StarsPurchaseSuccessPage() {
+function StarsPurchaseSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [confirmationResult, setConfirmationResult] = useState<TransactionConfirmation | null>(null);
@@ -347,5 +347,20 @@ export default function StarsPurchaseSuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function StarsPurchaseSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-color)' }}>
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white">در حال بارگذاری...</p>
+        </div>
+      </div>
+    }>
+      <StarsPurchaseSuccessContent />
+    </Suspense>
   );
 }

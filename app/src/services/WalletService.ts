@@ -124,7 +124,7 @@ class WalletService {
       const toAddress = Address.parse(params.to);
       const body = beginCell()
         .storeUint(0, 32) // op
-        .storeStringTail(params.payload || 'Transfer from FranumBot')
+        .storeStringTail(params.payload || 'Transfer from FragmentParsiBot')
         .endCell();
 
       // ارسال تراکنش

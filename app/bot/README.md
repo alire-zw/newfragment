@@ -1,6 +1,6 @@
-# ربات تلگرام Franum
+# ربات تلگرام FragmentParsi
 
-ربات تلگرام برای مینی اپ Franum که امکان خرید شماره مجازی، استارز و پریمیوم تلگرام را فراهم می‌کند.
+ربات تلگرام برای مینی اپ FragmentParsi که امکان خرید شماره مجازی، استارز و پریمیوم تلگرام را فراهم می‌کند.
 
 ## ویژگی‌ها
 
@@ -30,12 +30,12 @@ cp env.example .env
 سپس مقادیر را تنظیم کنید:
 
 ```env
-BOT_TOKEN=8228019728:AAGwn74rjv1MCmFymz5fJ7Q2PnSxE9Lt2Vk
-BOT_USERNAME=FranumBot
-MINI_APP_URL=https://clever-bluejay-charmed.ngrok-free.app
+BOT_TOKEN=8200827364:AAGVkmbDAHNBrIY31deTelKzbQ1Rob5Y2KE
+BOT_USERNAME=FragmentParsiBot
+MINI_APP_URL=https://app.numberstar.shop/
 DB_HOST=localhost
 DB_USER=root
-DB_PASSWORD=
+DB_PASSWORD=Alireza1380#
 DB_NAME=franumbot_db
 ```
 
@@ -68,7 +68,7 @@ npm start
 
 ### فرمت لینک رفرال
 ```
-https://t.me/FranumBot/Franum?startapp=123456789
+https://t.me/FragmentParsiBot/FragmentParsi?startapp=123456789
 ```
 
 ## ساختار فایل‌ها

@@ -9,7 +9,7 @@ module.exports = {
   zibal: {
     // Sandbox configuration (for development/testing)
     sandbox: {
-      merchant: 'zibal',
+      merchant: '68a6457ea45c72001333cc4a',
       baseUrl: 'https://gateway.zibal.ir/v1',
       startUrl: 'https://gateway.zibal.ir/start'
     },
@@ -24,21 +24,21 @@ module.exports = {
   
   // Bot configuration
   bot: {
-    token: process.env.BOT_TOKEN || '8228019728:AAGwn74rjv1MCmFymz5fJ7Q2PnSxE9Lt2Vk',
-    username: process.env.BOT_USERNAME || 'FranumBot'
+    token: process.env.BOT_TOKEN || '8200827364:AAGVkmbDAHNBrIY31deTelKzbQ1Rob5Y2KE',
+    username: process.env.BOT_USERNAME || 'FragmentParsiBot'
   },
   
   // Mini App configuration
   miniApp: {
-    name: 'Franum',
-    url: process.env.MINI_APP_URL || 'https://clever-bluejay-charmed.ngrok-free.app'
+    name: 'FragmentParsi',
+    url: process.env.MINI_APP_URL || 'https://app.numberstar.shop'
   },
   
   // Database configuration
   database: {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
+    password: process.env.DB_PASSWORD || 'Alireza1380#',
     database: process.env.DB_NAME || 'franumbot_db'
   },
   

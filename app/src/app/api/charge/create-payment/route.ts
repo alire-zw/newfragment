@@ -3,7 +3,7 @@ import pool from '../../../../../database/connection';
 
 // Zibal configuration - Sandbox Mode
 const ZIBAL_CONFIG = {
-  merchant: 'zibal',
+  merchant: '68a6457ea45c72001333cc4a',
   baseUrl: 'https://gateway.zibal.ir/v1',
   startUrl: 'https://gateway.zibal.ir/start'
 };

@@ -3,10 +3,10 @@ import { StarsPurchaseService } from '../../../../../database/StarsPurchaseServi
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { successPageId: string } }
+  { params }: { params: Promise<{ successPageId: string }> }
 ) {
   try {
-    const { successPageId } = params;
+    const { successPageId } = await params;
 
     if (!successPageId) {
       return NextResponse.json({

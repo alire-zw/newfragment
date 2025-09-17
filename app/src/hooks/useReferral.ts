@@ -64,7 +64,7 @@ export const useReferral = () => {
 
   // تولید لینک رفرال
   const generateReferralLink = (telegramID: number) => {
-    return `t.me/FranumBot/franum?startapp=${telegramID}`;
+    return `t.me/FragmentParsiBot/fragmentparsi?startapp=${telegramID}`;
   };
 
   // کپی کردن لینک رفرال

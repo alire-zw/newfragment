@@ -1,12 +1,12 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Cash01Icon from '../../../../public/icons/cash-01-stroke-rounded';
 import CheckmarkIcon from '../../../../public/icons/checkmark-icon';
 import UserStrokeRoundedIcon from '../../../../public/icons/user-stroke-rounded';
 
-export default function PremiumSuccessPage() {
+function PremiumSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
@@ -251,5 +251,20 @@ export default function PremiumSuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PremiumSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-color)' }}>
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white">در حال بارگذاری...</p>
+        </div>
+      </div>
+    }>
+      <PremiumSuccessContent />
+    </Suspense>
   );
 }

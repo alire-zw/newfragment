@@ -30,7 +30,7 @@ interface PremiumBuyResponse {
 
 export async function POST(request: NextRequest) {
   let purchaseID: string | undefined;
-  let premiumPurchase: any = null;
+  const premiumPurchase: any = null;
   let successPageId: string | undefined;
   
   try {
