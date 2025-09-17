@@ -9,7 +9,7 @@ export async function GET() {
       nationalCode: "1234567890"
     };
 
-    const response = await fetch('https://sandbox.zibal.ir/v1/facility/shahkarInquiry', {
+    const response = await fetch('https://gateway.zibal.ir/v1/facility/shahkarInquiry', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

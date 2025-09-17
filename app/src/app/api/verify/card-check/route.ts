@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     try {
       // درخواست به API زیبال
-      const zibalResponse = await fetch('https://sandbox.zibal.ir/v1/facility/checkCardWithNationalCode', {
+      const zibalResponse = await fetch('https://gateway.zibal.ir/v1/facility/checkCardWithNationalCode', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

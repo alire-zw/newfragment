@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     try {
       // درخواست به API زیبال
-      const shahkarResponse = await fetch('https://sandbox.zibal.ir/v1/facility/shahkarInquiry', {
+      const shahkarResponse = await fetch('https://gateway.zibal.ir/v1/facility/shahkarInquiry', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
