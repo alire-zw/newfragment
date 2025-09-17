@@ -13,7 +13,7 @@ export async function GET() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer e0d46ad8d3654fff982ea7d5ea6ce665',
+        'Authorization': 'Bearer ca2325c1ab61456a8a7d2104c93646dc',
         'Accept': 'application/json'
       },
       body: JSON.stringify(testData)
