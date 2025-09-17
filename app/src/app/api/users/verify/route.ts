@@ -64,23 +64,48 @@ export async function POST(request: NextRequest) {
       // اجازه ارسال مجدد درخواست احراز هویت
 
       // بررسی تطبیق کد ملی و شماره موبایل با سرویس زیبال
-      const shahkarResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/verify/shahkar`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          mobile: phoneNumber,
-          nationalCode: nationalId
-        })
-      });
+      try {
+        const shahkarResponse = await fetch('https://gateway.zibal.ir/v1/facility/shahkarInquiry', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ca2325c1ab61456a8a7d2104c93646dc',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            mobile: phoneNumber,
+            nationalCode: nationalId
+          })
+        });
 
-      const shahkarData = await shahkarResponse.json();
+        if (!shahkarResponse.ok) {
+          console.error('❌ Shahkar API Error:', {
+            status: shahkarResponse.status,
+            statusText: shahkarResponse.statusText
+          });
+          
+          const errorText = await shahkarResponse.text();
+          console.error('❌ Error Response:', errorText);
+          
+          return NextResponse.json(
+            { message: 'خطا در ارتباط با سرویس احراز هویت' },
+            { status: 400 }
+          );
+        }
 
-      if (!shahkarData.success || !shahkarData.data?.matched) {
+        const shahkarData = await shahkarResponse.json();
+
+        if (shahkarData.result !== 1 || !shahkarData.data?.matched) {
+          return NextResponse.json(
+            { message: shahkarData.message || 'کد ملی و شماره موبایل تطبیق ندارند' },
+            { status: 400 }
+          );
+        }
+      } catch (error) {
+        console.error('❌ خطا در ارتباط با API زیبال:', error);
         return NextResponse.json(
-          { message: shahkarData.message || 'کد ملی و شماره موبایل تطبیق ندارند' },
-          { status: 400 }
+          { message: 'خطا در ارتباط با سرویس احراز هویت' },
+          { status: 500 }
         );
       }
 
