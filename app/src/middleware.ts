@@ -36,7 +36,7 @@ const ADMIN_PATHS = [
   '/admin',
 ];
 
-export async function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // اجازه دسترسی به روترهای عمومی

@@ -42,10 +42,10 @@ export const getCurrentCookies = async (): Promise<CookieInfo | Partial<CookieIn
   try {
     const mysql = require('mysql2/promise');
     const connection = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: 'Alireza1380#',
-      database: 'franumbot_db'
+      host: process.env.DB_HOST || 'localhost',
+      user: process.env.DB_USER || 'root',
+      password: process.env.DB_PASSWORD || 'Alireza1380#',
+      database: process.env.DB_NAME || 'franumbot_db'
     });
     
     const [rows] = await connection.execute(`
@@ -114,10 +114,10 @@ export const getCookieStringFromDB = async (): Promise<string> => {
   try {
     const mysql = require('mysql2/promise');
     const connection = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: 'Alireza1380#',
-      database: 'franumbot_db'
+      host: process.env.DB_HOST || 'localhost',
+      user: process.env.DB_USER || 'root',
+      password: process.env.DB_PASSWORD || 'Alireza1380#',
+      database: process.env.DB_NAME || 'franumbot_db'
     });
     
     const [rows] = await connection.execute(`

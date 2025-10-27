@@ -8,10 +8,10 @@ const REPORT_CHANNEL_ID = '-1003271407389';
 
 // ایجاد اتصال دیتابیس
 const dbConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: 'Alireza1380#',
-  database: 'franumbot_db',
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'Alireza1380#',
+  database: process.env.DB_NAME || 'franumbot_db',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -101,24 +101,22 @@ function formatDateEnglish(date) {
     const monthName = m.format('jMMMM');
     const englishMonth = persianMonths[monthName] || monthName;
     
-    // دریافت روز، سال، ساعت و دقیقه
+    // دریافت روز، ساعت و دقیقه
     const day = m.format('jD');
-    const year = m.format('jYYYY');
     const hour = m.format('HH');
     const minute = m.format('mm');
     
-    return `${day} ${englishMonth} ${year} - ${hour}:${minute}`;
+    return `${day} ${englishMonth} - ${hour}:${minute}`;
   } catch (error) {
     console.log('خطا در moment-jalaali:', error.message);
     // اگر moment کار نکرد، از تاریخ میلادی استفاده کن
     const d = new Date(date);
     const day = d.getDate().toString().padStart(2, '0');
     const month = (d.getMonth() + 1).toString().padStart(2, '0');
-    const year = d.getFullYear();
     const hour = d.getHours().toString().padStart(2, '0');
     const minute = d.getMinutes().toString().padStart(2, '0');
     
-    return `${day}/${month}/${year} - ${hour}:${minute}`;
+    return `${day}/${month} - ${hour}:${minute}`;
   }
 }
 
