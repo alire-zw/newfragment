@@ -9,7 +9,7 @@ import PackageDeliveredIcon from '../../../public/icons/package-delivered-stroke
 
 export default function MyVirtualNumbersPage() {
   const router = useRouter();
-  const { virtualNumbers, loading, error } = useMyVirtualNumbers();
+  const { virtualNumbers, loading, error, isRetrying } = useMyVirtualNumbers();
 
   const formatPrice = (price: number) => {
     return price.toLocaleString('fa-IR');
@@ -84,18 +84,29 @@ export default function MyVirtualNumbersPage() {
           {loading && (
             <div className="text-center py-8">
               <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-sm" style={{ color: '#8794a1' }}>در حال بارگذاری...</p>
+              <p className="text-sm" style={{ color: '#8794a1' }}>
+                {isRetrying ? 'در حال تلاش مجدد...' : 'در حال بارگذاری شماره‌های مجازی...'}
+              </p>
+              <p className="text-xs mt-2" style={{ color: '#6b7280' }}>
+                {isRetrying ? 'لطفاً کمی صبر کنید' : 'لطفاً صبر کنید'}
+              </p>
             </div>
           )}
 
           {/* Error State */}
-          {error && (
+          {error && !loading && (
             <div className="mb-4 p-4 rounded-lg" style={{ 
               backgroundColor: 'rgba(239, 68, 68, 0.1)',
               border: '1px solid rgba(239, 68, 68, 0.3)',
               color: '#ef4444'
             }}>
-              <p className="text-sm">{error}</p>
+              <p className="text-sm mb-2">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="text-xs px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 transition-colors"
+              >
+                تلاش مجدد
+              </button>
             </div>
           )}
 

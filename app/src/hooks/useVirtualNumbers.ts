@@ -25,18 +25,24 @@ export const useVirtualNumbers = (serviceId: number = 1) => {
   const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
 
   useEffect(() => {
-    const fetchCountries = async () => {
-      try {
+    const fetchCountries = async (isRetry = false) => {
+      if (!isRetry) {
         setLoading(true);
         setError(null);
+      }
 
+      try {
         const url = `${API_BASE_URL}/prices/${serviceId}?token=${AUTH_TOKEN}`;
         const data = await apiGet<ApiResponse>(url);
 
         if (data.success) {
           setCountries(data.data);
+          setError(null);
+          setRetryCount(0);
           // نمایش پیام کش در کنسول
           if (data.cached) {
             console.log('📦 Data loaded from cache');
@@ -44,10 +50,28 @@ export const useVirtualNumbers = (serviceId: number = 1) => {
             console.log('🌐 Data loaded from API');
           }
         } else {
+          // اگر خطای احراز هویت است، retry کن
+          if (data.message?.includes('احراز هویت') && retryCount < 3) {
+            console.log(`🔄 [VIRTUAL-NUMBERS] Auth error, retrying... (${retryCount + 1}/3)`);
+            setIsRetrying(true);
+            setRetryCount(prev => prev + 1);
+            setTimeout(() => fetchCountries(true), 1000 * (retryCount + 1));
+            return;
+          }
           throw new Error(data.message || 'خطا در دریافت داده‌ها');
         }
       } catch (err) {
         console.error('خطا در دریافت لیست کشورها:', err);
+        
+        // اگر خطای احراز هویت است، retry کن
+        if (err instanceof Error && err.message.includes('احراز هویت') && retryCount < 3) {
+          console.log(`🔄 [VIRTUAL-NUMBERS] Auth error, retrying... (${retryCount + 1}/3)`);
+          setIsRetrying(true);
+          setRetryCount(prev => prev + 1);
+          setTimeout(() => fetchCountries(true), 1000 * (retryCount + 1));
+          return;
+        }
+        
         setError(err instanceof Error ? err.message : 'خطای نامشخص');
         
         // در صورت خطا، داده‌های پیش‌فرض نمایش داده می‌شود
@@ -57,20 +81,30 @@ export const useVirtualNumbers = (serviceId: number = 1) => {
           { id: '3', name: 'انگلیس', flag: '🇬🇧', code: '+44', price: 40000, available: true },
         ]);
       } finally {
-        setLoading(false);
+        if (!isRetry) {
+          setLoading(false);
+          setIsRetrying(false);
+        }
       }
     };
 
-    fetchCountries();
+    // اضافه کردن delay کوچک برای اطمینان از تکمیل احراز هویت
+    const timer = setTimeout(() => {
+      fetchCountries();
+    }, 500);
+    
+    return () => clearTimeout(timer);
   }, [serviceId]);
 
   return {
     countries,
-    loading,
+    loading: loading || isRetrying,
     error,
+    isRetrying,
     refetch: () => {
       setLoading(true);
       setError(null);
+      setRetryCount(0);
       // دوباره fetch کردن
       const fetchCountries = async () => {
         try {

@@ -12,7 +12,7 @@ async function testCookies() {
     const connection = await mysql.createConnection({
       host: 'localhost',
       user: 'root',
-      password: '',
+      password: 'Alireza1380#',
       database: 'franumbot_db'
     });
     
@@ -194,7 +194,7 @@ async function testCookies() {
       const connection = await mysql.createConnection({
         host: 'localhost',
         user: 'root',
-        password: '',
+        password: 'Alireza1380#',
         database: 'franumbot_db'
       });
       

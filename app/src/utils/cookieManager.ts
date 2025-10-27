@@ -44,7 +44,7 @@ export const getCurrentCookies = async (): Promise<CookieInfo | Partial<CookieIn
     const connection = await mysql.createConnection({
       host: 'localhost',
       user: 'root',
-      password: '',
+      password: 'Alireza1380#',
       database: 'franumbot_db'
     });
     
@@ -116,7 +116,7 @@ export const getCookieStringFromDB = async (): Promise<string> => {
     const connection = await mysql.createConnection({
       host: 'localhost',
       user: 'root',
-      password: '',
+      password: 'Alireza1380#',
       database: 'franumbot_db'
     });
     

@@ -4,7 +4,7 @@ import mysql from 'mysql2/promise';
 const initConfig = {
   host: 'localhost',
   user: 'root',
-  password: '',
+  password: 'Alireza1380#',
   multipleStatements: true
 };
 

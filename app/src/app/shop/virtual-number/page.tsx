@@ -24,7 +24,7 @@ export default function VirtualNumberPage() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   
   // دریافت داده‌ها از API
-  const { countries, loading, error, refetch } = useVirtualNumbers(1);
+  const { countries, loading, error, isRetrying, refetch } = useVirtualNumbers(1);
   
   // مدیریت اطلاعات کاربر
   useUser();
@@ -251,6 +251,15 @@ export default function VirtualNumberPage() {
                      {/* Loading State */}
            {loading && (
              <div className="space-y-0">
+               <div className="text-center py-4 mb-4">
+                 <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                 <p className="text-sm" style={{ color: '#8794a1' }}>
+                   {isRetrying ? 'در حال تلاش مجدد...' : 'در حال بارگذاری لیست کشورها...'}
+                 </p>
+                 <p className="text-xs mt-1" style={{ color: '#6b7280' }}>
+                   {isRetrying ? 'لطفاً کمی صبر کنید' : 'لطفاً صبر کنید'}
+                 </p>
+               </div>
                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
                  <div
                    key={i}
@@ -297,7 +306,7 @@ export default function VirtualNumberPage() {
            )}
 
            {/* Error State */}
-           {error && (
+           {error && !loading && (
              <div className="text-center py-8">
                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-4">
                  <p className="text-red-400 text-sm mb-2">خطا در دریافت داده‌ها:</p>

@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../../../database/connection';
+import { requireAuth, requireOwnership, handleAuthError } from '@/utils/auth';
 
 export async function POST(request: NextRequest) {
   try {
+    // 🔒 احراز هویت
+    const authenticatedUserId = await requireAuth(request);
+
     const body = await request.json();
     const { virtualNumberID } = body;
 
@@ -58,6 +62,17 @@ export async function POST(request: NextRequest) {
         country: string;
         service: string;
       };
+      
+      // 🔒 بررسی اینکه شماره مجازی متعلق به کاربر است
+      const [ownerRows] = await conn.execute(
+        'SELECT userTelegramID FROM virtual_numbers WHERE virtualNumberID = ? OR requestID = ?',
+        [virtualNumberID, virtualNumberID.replace('VN_', '')]
+      );
+      
+      if (Array.isArray(ownerRows) && ownerRows.length > 0) {
+        const ownerTelegramID = (ownerRows[0] as { userTelegramID: number }).userTelegramID;
+        await requireOwnership(request, ownerTelegramID, false);
+      }
 
       // دریافت کد از API خارجی
       const requestId = virtualNumber.requestID;
@@ -136,11 +151,12 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('خطا در دریافت کد تأیید:', error);
+    const { message, status } = handleAuthError(error);
+    console.error('❌ خطا در دریافت کد تأیید:', error);
     
     return NextResponse.json({
       success: false,
-      message: error instanceof Error ? error.message : 'خطای داخلی سرور'
-    }, { status: 500 });
+      message: message || (error instanceof Error ? error.message : 'خطای داخلی سرور')
+    }, { status: status || 500 });
   }
 }

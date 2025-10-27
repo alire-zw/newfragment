@@ -2,6 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
+    // بررسی احراز هویت
+    const initData = request.headers.get('X-Telegram-Init-Data');
+    const userId = request.headers.get('X-User-Id');
+    
+    if (!initData && !userId) {
+      return NextResponse.json(
+        { message: 'احراز هویت الزامی است' },
+        { status: 401 }
+      );
+    }
+
     const { nationalCode, birthDate, cardNumber } = await request.json();
 
     // اعتبارسنجی ورودی‌ها

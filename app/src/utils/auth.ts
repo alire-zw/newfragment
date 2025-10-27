@@ -98,7 +98,7 @@ export async function requireOwnership(
     try {
       const isAdmin = await UserService.isUserAdmin(userId);
       if (isAdmin) {
-        console.log(`✅ [AUTH] Admin ${userId} accessing resource owned by ${resourceOwnerId}`);
+        // Admin accessing resource
         return userId;
       }
     } catch (error) {
@@ -107,7 +107,7 @@ export async function requireOwnership(
     }
   }
 
-  console.error(`❌ [AUTH] Access denied: User ${userId} tried to access resource owned by ${resourceOwnerId}`);
+  // Access denied
   throw new Error('شما دسترسی به این منبع ندارید');
 }
 

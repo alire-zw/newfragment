@@ -20,13 +20,23 @@ const bot = new Telegraf(botConfig.botToken);
 
 // Middleware برای لاگ کردن
 bot.use((ctx, next) => {
-  console.log(`📱 پیام از کاربر ${ctx.from.id}: ${ctx.message?.text || 'کامند'}`);
+  if (ctx.from) {
+    console.log(`📱 پیام از کاربر ${ctx.from.id}: ${ctx.message?.text || 'کامند'}`);
+  } else {
+    console.log(`📱 پیام از کانال: ${ctx.message?.text || 'کامند'}`);
+  }
   return next();
 });
 
 // کامند /start
 bot.start(async (ctx) => {
   try {
+    // بررسی اینکه آیا پیام از کاربر است یا کانال
+    if (!ctx.from) {
+      await ctx.reply('🤖 ربات آماده دریافت گزارش‌های خرید است!');
+      return;
+    }
+    
     const userId = ctx.from.id;
     const username = ctx.from.username || `user_${userId}`;
     const firstName = ctx.from.first_name || '';
@@ -105,6 +115,11 @@ bot.start(async (ctx) => {
 
 // کامند /help
 bot.help(async (ctx) => {
+  if (!ctx.from) {
+    await ctx.reply('🤖 ربات آماده دریافت گزارش‌های خرید است!');
+    return;
+  }
+  
   await ctx.reply(botConfig.messages.help, {
     reply_markup: {
       inline_keyboard: [
@@ -130,6 +145,11 @@ bot.help(async (ctx) => {
 
 // کامند /shop
 bot.command('shop', async (ctx) => {
+  if (!ctx.from) {
+    await ctx.reply('🤖 ربات آماده دریافت گزارش‌های خرید است!');
+    return;
+  }
+  
   await ctx.reply('📞 برای خرید شماره مجازی، روی دکمه زیر کلیک کنید:', {
     reply_markup: {
       inline_keyboard: [
@@ -144,6 +164,11 @@ bot.command('shop', async (ctx) => {
 
 // کامند /stars
 bot.command('stars', async (ctx) => {
+  if (!ctx.from) {
+    await ctx.reply('🤖 ربات آماده دریافت گزارش‌های خرید است!');
+    return;
+  }
+  
   await ctx.reply('⭐ برای خرید استارز، روی دکمه زیر کلیک کنید:', {
     reply_markup: {
       inline_keyboard: [
@@ -158,6 +183,11 @@ bot.command('stars', async (ctx) => {
 
 // کامند /premium
 bot.command('premium', async (ctx) => {
+  if (!ctx.from) {
+    await ctx.reply('🤖 ربات آماده دریافت گزارش‌های خرید است!');
+    return;
+  }
+  
   await ctx.reply('💎 برای خرید پریمیوم، روی دکمه زیر کلیک کنید:', {
     reply_markup: {
       inline_keyboard: [
@@ -172,6 +202,11 @@ bot.command('premium', async (ctx) => {
 
 // کامند /profile
 bot.command('profile', async (ctx) => {
+  if (!ctx.from) {
+    await ctx.reply('🤖 ربات آماده دریافت گزارش‌های خرید است!');
+    return;
+  }
+  
   await ctx.reply('👤 برای مشاهده پروفایل، روی دکمه زیر کلیک کنید:', {
     reply_markup: {
       inline_keyboard: [
@@ -188,6 +223,11 @@ bot.command('profile', async (ctx) => {
 
 // پردازش پیام‌های متنی
 bot.on('text', async (ctx) => {
+  if (!ctx.from) {
+    await ctx.reply('🤖 ربات آماده دریافت گزارش‌های خرید است!');
+    return;
+  }
+  
   const text = ctx.message.text;
   
   if (text.includes('شماره') || text.includes('مجازی')) {

@@ -59,16 +59,37 @@ class CookieRefreshService {
 
     console.log('🌐 [COOKIE-SERVICE] Initializing browser...');
     this.browser = await puppeteer.launch({
-      headless: true, // در production از headless استفاده می‌کنیم
+      headless: true,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
         '--no-first-run',
-        '--no-zygote',
-        '--disable-gpu'
-      ]
+        '--disable-extensions',
+        '--disable-default-apps',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding',
+        '--disable-features=TranslateUI',
+        '--disable-ipc-flooding-protection',
+        '--disable-hang-monitor',
+        '--disable-prompt-on-repost',
+        '--disable-sync',
+        '--disable-translate',
+        '--hide-scrollbars',
+        '--mute-audio',
+        '--no-default-browser-check',
+        '--no-pings',
+        '--safebrowsing-disable-auto-update',
+        '--ignore-certificate-errors',
+        '--ignore-ssl-errors',
+        '--ignore-certificate-errors-spki-list',
+        '--disable-web-security',
+        '--disable-features=VizDisplayCompositor',
+        '--window-size=1366,768'
+      ],
+      timeout: 120000
     });
 
     this.page = await this.browser.newPage();
@@ -90,13 +111,37 @@ class CookieRefreshService {
 
       // رفتن به صفحه marketapp.ws
       console.log('🌐 [COOKIE-SERVICE] Navigating to marketapp.ws...');
-      await this.page.goto('https://marketapp.ws/fragment/', { 
-        waitUntil: 'networkidle2',
-        timeout: 30000 
-      });
-      
-      // صبر برای بارگذاری کامل صفحه
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      try {
+        await this.page.goto('https://marketapp.ws/fragment/', { 
+          waitUntil: 'domcontentloaded',
+          timeout: 60000 
+        });
+        
+        // صبر برای بارگذاری کامل صفحه
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      } catch (error) {
+        console.warn('⚠️ [COOKIE-SERVICE] Failed to load marketapp.ws, using existing cookies...');
+        // اگر صفحه لود نشد، از کوکی‌های موجود استفاده کن
+        const existingCookies = await this.getExistingCookies();
+        if (existingCookies.length > 0) {
+          console.log('🍪 [COOKIE-SERVICE] Using existing cookies from database');
+          await this.saveCookiesToDatabase(existingCookies.map(c => ({
+            name: c.name,
+            value: c.value,
+            domain: c.domain,
+            path: c.path,
+            secure: c.secure,
+            httpOnly: c.httpOnly,
+            sameSite: c.sameSite,
+            expires: c.expirationDate
+          })));
+          status = 'success';
+          message = 'Used existing cookies from database';
+          cookiesCount = existingCookies.length;
+          return;
+        }
+        throw error;
+      }
 
       // دریافت کوکی‌های موجود از دیتابیس
       let existingCookies = await this.getExistingCookies();
