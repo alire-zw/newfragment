@@ -30,7 +30,7 @@ function PurchaseContent() {
   const [error, setError] = useState('');
 
   const formatPrice = (price: number) => {
-    return price.toLocaleString('fa-IR');
+    return Math.floor(price).toLocaleString('fa-IR');
   };
 
   const handlePurchase = useCallback(async () => {
@@ -43,23 +43,21 @@ function PurchaseContent() {
     setError('');
 
     try {
-      const response = await fetch('/api/virtual-numbers/purchase', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userTelegramID: userInfo.id,
-          countryId: countryId,
-          countryName: countryName,
-          price: countryPrice
-        }),
+      const { apiPost } = await import('@/utils/api');
+      
+      const data = await apiPost('/api/virtual-numbers/purchase', {
+        userTelegramID: userInfo.id,
+        countryId: countryId,
+        countryName: countryName,
+        price: countryPrice
       });
-
-      const data = await response.json();
 
       if (data.success) {
         setPurchaseResult(data.data);
+        
+        // Trigger wallet update event
+        window.dispatchEvent(new CustomEvent('walletUpdated'));
+        
         // The redirect will happen automatically in the render function
       } else {
         setError(data.error || 'خطا در خرید');

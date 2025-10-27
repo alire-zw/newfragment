@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTelegramUser } from '@/hooks/useTelegramUser';
 import { useUser } from '@/hooks/useUser';
+import { isTelegramWebApp, getTelegramWebApp, initializeTelegramWebApp, openLinkInTelegramWebApp } from '@/utils/telegram';
 import Cash01Icon from '../../../public/icons/cash-01-stroke-rounded';
 import InvoiceIcon from '../../../public/icons/invoice-02-stroke-rounded';
 import CreditCardPosIcon from '../../../public/icons/credit-card-pos-stroke-rounded';
@@ -42,6 +43,13 @@ export default function ChargePage() {
     setSuccess('');
   };
 
+  // اطمینان از initialize و expand شدن وب‌ویو تلگرام
+  useEffect(() => {
+    if (isTelegramWebApp()) {
+      initializeTelegramWebApp();
+    }
+  }, []);
+
   const handleSuggestedAmount = (value: number) => {
     setAmount(value.toString());
     setError('');
@@ -71,24 +79,28 @@ export default function ChargePage() {
     setError('');
 
     try {
-      const response = await fetch('/api/charge/create-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: amountNum,
-          userId: userInfo?.id,
-          description: 'شارژ حساب کیف پول',
-          selectedCardId: selectedCard?.accountID
-        })
+      const { apiPost } = await import('@/utils/api');
+      const data = await apiPost<any>('/api/charge/create-payment', {
+        amount: amountNum,
+        userId: userInfo?.id,
+        description: 'شارژ حساب کیف پول',
+        selectedCardId: selectedCard?.accountID
       });
 
-      const data = await response.json();
-
       if (data.success && data.paymentUrl) {
-        // هدایت به درگاه پرداخت
-        window.location.href = data.paymentUrl;
+        // هدایت به درگاه پرداخت - باید در همان WebView باز شود
+        console.log('🔗 Redirecting to payment gateway:', data.paymentUrl);
+        console.log('🔍 isTelegramWebApp:', isTelegramWebApp());
+        console.log('🔍 User Agent:', navigator.userAgent);
+        
+        // تست: آیا در WebView هستیم؟
+        if (isTelegramWebApp()) {
+          console.log('✅ Inside Telegram WebApp - using location.href');
+          window.location.href = data.paymentUrl;
+        } else {
+          console.log('❌ Outside Telegram WebApp - using location.href');
+          window.location.href = data.paymentUrl;
+        }
       } else {
         setError(data.error || 'خطا در ایجاد درخواست پرداخت');
       }
@@ -101,7 +113,7 @@ export default function ChargePage() {
   };
 
   const formatAmount = (amount: number) => {
-    return amount.toLocaleString('fa-IR');
+    return Math.floor(amount).toLocaleString('fa-IR');
   };
 
   // بارگذاری کارت‌های بانکی کاربر
@@ -114,14 +126,8 @@ export default function ChargePage() {
 
     setCardsLoading(true);
     try {
-      const response = await fetch(`/api/bank-accounts/get?telegramId=${userInfo.id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      const data = await response.json();
+      const { apiGet } = await import('@/utils/api');
+      const data = await apiGet<any>(`/api/bank-accounts/get?telegramId=${userInfo.id}`);
       
       if (data.success && data.accounts) {
         setUserCards(data.accounts);
@@ -411,6 +417,7 @@ export default function ChargePage() {
            {/* Transaction History Link */}
            <div className="text-center">
              <button 
+               onClick={() => window.location.href = '/history'}
                className="text-sm transition-colors duration-200"
                style={{ color: 'var(--field-accent-color)' }}
              >

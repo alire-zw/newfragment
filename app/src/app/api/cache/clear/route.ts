@@ -1,15 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cacheService } from '@/services/CacheService';
+import { requireAdmin, handleAuthError } from '@/utils/auth';
+import { logAudit, getRequestMetadata } from '@/utils/audit';
 
 // API برای پاک کردن کش
 export async function POST(request: NextRequest) {
   try {
+    // 🔒 احراز هویت و چک دسترسی ادمین
+    const adminId = await requireAdmin(request);
+
     const { searchParams } = new URL(request.url);
     const key = searchParams.get('key');
 
     if (key) {
       // پاک کردن کش خاص
       const deleted = cacheService.delete(key);
+
+      // 📝 ثبت لاگ
+      const metadata = getRequestMetadata(request);
+      await logAudit({
+        userId: adminId,
+        action: 'cache.clear',
+        resourceType: 'cache',
+        resourceId: key,
+        details: { deleted },
+        ...metadata
+      });
+
       return NextResponse.json({
         success: true,
         message: deleted ? `کش ${key} پاک شد` : `کش ${key} یافت نشد`,
@@ -18,23 +35,41 @@ export async function POST(request: NextRequest) {
     } else {
       // پاک کردن تمام کش
       cacheService.clear();
+
+      // 📝 ثبت لاگ
+      const metadata = getRequestMetadata(request);
+      await logAudit({
+        userId: adminId,
+        action: 'cache.clear',
+        resourceType: 'cache',
+        resourceId: 'all',
+        details: { action: 'clear_all' },
+        ...metadata
+      });
+
+      console.log('✅ [ADMIN] All cache cleared by admin:', adminId);
+
       return NextResponse.json({
         success: true,
         message: 'تمام کش پاک شد'
       });
     }
   } catch (error) {
+    const { message, status } = handleAuthError(error);
     console.error('خطا در پاک کردن کش:', error);
     return NextResponse.json({
       success: false,
-      message: 'خطا در پاک کردن کش'
-    }, { status: 500 });
+      message
+    }, { status });
   }
 }
 
 // API برای دریافت اطلاعات کش
 export async function GET(request: NextRequest) {
   try {
+    // 🔒 احراز هویت و چک دسترسی ادمین
+    const adminId = await requireAdmin(request);
+
     const { searchParams } = new URL(request.url);
     const key = searchParams.get('key');
 
@@ -56,10 +91,11 @@ export async function GET(request: NextRequest) {
       });
     }
   } catch (error) {
+    const { message, status } = handleAuthError(error);
     console.error('خطا در دریافت اطلاعات کش:', error);
     return NextResponse.json({
       success: false,
-      message: 'خطا در دریافت اطلاعات کش'
-    }, { status: 500 });
+      message
+    }, { status });
   }
 }

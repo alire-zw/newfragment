@@ -46,6 +46,9 @@ function PremiumSuccessContent() {
         payload: decodeURIComponent(payload),
         successPageId: successPageId || ''
       });
+      
+      // Trigger wallet update event
+      window.dispatchEvent(new CustomEvent('walletUpdated'));
     }
     
     setIsLoading(false);

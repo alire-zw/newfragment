@@ -1,7 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin, handleAuthError } from '@/utils/auth';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // 🔒 احراز هویت و چک دسترسی ادمین (فقط برای تست)
+    await requireAdmin(request);
     console.log('🧪 Testing Shahkar API...');
     
     const testData = {
@@ -40,9 +43,10 @@ export async function GET() {
     });
 
   } catch (error) {
+    const { message, status } = handleAuthError(error);
     console.error('❌ Test Error:', error);
     return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    });
+      error: message
+    }, { status });
   }
 }

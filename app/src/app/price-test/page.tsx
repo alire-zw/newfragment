@@ -26,15 +26,8 @@ export default function PriceTestPage() {
     setResult(null);
 
     try {
-      const response = await fetch('/api/telegram/price', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ quantity: parseInt(quantity) })
-      });
-
-      const data = await response.json();
+      const { apiPost } = await import('@/utils/api');
+      const data = await apiPost<any>('/api/telegram/price', { quantity: parseInt(quantity) });
       
       if (data.success) {
         setResult(data.data);

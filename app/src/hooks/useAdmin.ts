@@ -12,12 +12,8 @@ export function useAdmin() {
   const [loading, setLoading] = useState<boolean>(true);
   const [adminIds, setAdminIds] = useState<number[]>([]);
 
-  // لیست ایدی‌های ادمین (می‌توانید این ایدی‌ها را تغییر دهید)
-  const ADMIN_TELEGRAM_IDS = [
-    123456789, // ایدی ادمین اول
-    987654321, // ایدی ادمین دوم
-    // ایدی‌های بیشتر را اینجا اضافه کنید
-  ];
+  // حذف hardcode - فقط از دیتابیس استفاده میکنیم
+  const ADMIN_TELEGRAM_IDS: number[] = [];
 
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -27,14 +23,11 @@ export function useAdmin() {
       }
 
       try {
-        // بررسی ایدی تلگرام در لیست ادمین‌ها
-        const isInAdminList = ADMIN_TELEGRAM_IDS.includes(userInfo.id);
-        
-        // بررسی وضعیت ادمین در دیتابیس
+        // فقط از دیتابیس چک میکنیم - بدون hardcode
         const isAdminInDB = (dbUser as User)?.isAdmin || false;
         
-        // کاربر ادمین است اگر در لیست ایدی‌ها باشد یا در دیتابیس ادمین باشد
-        const adminStatus = isInAdminList || isAdminInDB;
+        // کاربر فقط از طریق دیتابیس ادمین است
+        const adminStatus = isAdminInDB;
         
         setIsAdmin(adminStatus);
         setAdminIds(ADMIN_TELEGRAM_IDS);

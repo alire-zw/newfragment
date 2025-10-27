@@ -41,8 +41,8 @@ export default function SystemSettingsPage() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await fetch('/api/admin/settings');
-        const data = await response.json();
+        const { apiGet } = await import('@/utils/api');
+        const data = await apiGet<any>('/api/admin/settings');
         
         if (data.success) {
           setSettings(data.data);
@@ -93,20 +93,13 @@ export default function SystemSettingsPage() {
     setSaving(true);
     
     try {
-      const response = await fetch('/api/admin/settings', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          settings: settings.map(setting => ({
-            setting_key: setting.setting_key,
-            setting_value: setting.setting_value
-          }))
-        }),
+      const { apiPut } = await import('@/utils/api');
+      const data = await apiPut<any>('/api/admin/settings', {
+        settings: settings.map(setting => ({
+          setting_key: setting.setting_key,
+          setting_value: setting.setting_value
+        }))
       });
-      
-      const data = await response.json();
       
       if (data.success) {
         showNotification('تنظیمات با موفقیت ذخیره شد', 'success');

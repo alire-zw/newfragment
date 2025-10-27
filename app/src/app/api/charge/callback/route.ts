@@ -9,6 +9,7 @@ const ZIBAL_CONFIG = {
 
 export async function GET(request: NextRequest) {
   let connection;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://app.numberstar.shop';
   
   try {
     const { searchParams } = new URL(request.url);
@@ -21,11 +22,13 @@ export async function GET(request: NextRequest) {
     });
 
     if (!trackId) {
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/charge/callback?error=missing_track_id`);
+      // ریدایرکت مستقیم به صفحه callback با خطا
+      return NextResponse.redirect(`${baseUrl}/charge/callback?error=missing_track_id`);
     }
 
     if (success !== '1') {
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/charge/callback?error=payment_failed`);
+      // ریدایرکت مستقیم به صفحه callback با خطا
+      return NextResponse.redirect(`${baseUrl}/charge/callback?error=payment_failed`);
     }
 
     // تایید پرداخت در زیبال
@@ -137,15 +140,18 @@ export async function GET(request: NextRequest) {
         console.error('❌ Invalid orderId format:', orderId);
       }
 
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/charge/callback?success=true&amount=${amountInToman}&trackId=${trackId}`);
+      // ریدایرکت مستقیم به صفحه callback با موفقیت
+      return NextResponse.redirect(`${baseUrl}/charge/callback?success=true&amount=${amountInToman}&trackId=${trackId}`);
     } else {
       console.error('❌ Payment verification failed:', verifyData);
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/charge/callback?error=verification_failed`);
+      // ریدایرکت مستقیم به صفحه callback با خطا
+      return NextResponse.redirect(`${baseUrl}/charge/callback?error=verification_failed`);
     }
 
   } catch (error) {
     console.error('❌ Error processing payment callback:', error);
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/charge/callback?error=server_error`);
+    // ریدایرکت مستقیم به صفحه callback با خطا
+    return NextResponse.redirect(`${baseUrl}/charge/callback?error=server_error`);
   } finally {
     if (connection) {
       connection.release();

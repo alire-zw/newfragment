@@ -103,16 +103,11 @@ export default function StarsPage() {
   useEffect(() => {
     const fetchProfitPercentage = async () => {
       try {
-        const response = await fetch('/api/admin/settings');
-        const data = await response.json();
+        const { apiGet } = await import('@/utils/api');
+        const data = await apiGet<any>('/api/settings/public');
         
-        if (data.success) {
-          const starsSetting = data.data.find((setting: any) => 
-            setting.setting_key === 'stars_profit_percentage'
-          );
-          if (starsSetting) {
-            setProfitPercentage(parseFloat(starsSetting.setting_value) || 0);
-          }
+        if (data.success && data.data.stars_profit_percentage) {
+          setProfitPercentage(parseFloat(data.data.stars_profit_percentage) || 0);
         }
       } catch (error) {
         console.error('خطا در دریافت درصد سود:', error);
@@ -126,30 +121,16 @@ export default function StarsPage() {
   useEffect(() => {
     const calculatePricePerStar = async () => {
       try {
+        const { apiPost } = await import('@/utils/api');
+        
         // Get price for 50 stars as base
-        const priceResponse = await fetch('/api/telegram/price', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ quantity: 50 })
-        });
-
-        const priceResult = await priceResponse.json();
+        const priceResult = await apiPost<any>('/api/telegram/price', { quantity: 50 });
         
         if (priceResult.success && priceResult.data) {
           const tonPrice = priceResult.data.tonPrice;
           
           // Convert TON to Toman
-          const convertResponse = await fetch('/api/telegram/convert-price', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ tonAmount: tonPrice })
-          });
-
-          const convertResult = await convertResponse.json();
+          const convertResult = await apiPost<any>('/api/telegram/convert-price', { tonAmount: tonPrice });
           
           if (convertResult.success && convertResult.data) {
             // Calculate price per star
@@ -180,15 +161,8 @@ export default function StarsPage() {
 
     setUserSearchLoading(true);
     try {
-      const response = await fetch('/api/telegram/username', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username: username.trim() })
-      });
-
-      const data = await response.json();
+      const { apiPost } = await import('@/utils/api');
+      const data = await apiPost<any>('/api/telegram/username', { username: username.trim() });
       
       if (data.success && data.data) {
         setFoundUser({
@@ -230,30 +204,16 @@ export default function StarsPage() {
 
     setPriceLoading(true);
     try {
+      const { apiPost } = await import('@/utils/api');
+      
       // First get the TON price for the stars
-      const priceResponse = await fetch('/api/telegram/price', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ quantity: stars })
-      });
-
-      const priceResult = await priceResponse.json();
+      const priceResult = await apiPost<any>('/api/telegram/price', { quantity: stars });
       
       if (priceResult.success && priceResult.data) {
         const tonPrice = priceResult.data.tonPrice;
         
         // Then convert TON to Toman
-        const convertResponse = await fetch('/api/telegram/convert-price', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ tonAmount: tonPrice })
-        });
-
-        const convertResult = await convertResponse.json();
+        const convertResult = await apiPost<any>('/api/telegram/convert-price', { tonAmount: tonPrice });
         
         if (convertResult.success && convertResult.data) {
           const baseTomanPrice = convertResult.data.tomanAmount;
@@ -342,28 +302,14 @@ export default function StarsPage() {
     } else {
       // محاسبه قیمت جدید
       try {
-        const priceResponse = await fetch('/api/telegram/price', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ quantity: starsToBuy })
-        });
-
-        const priceResult = await priceResponse.json();
+        const { apiPost } = await import('@/utils/api');
+        
+        const priceResult = await apiPost<any>('/api/telegram/price', { quantity: starsToBuy });
         
         if (priceResult.success && priceResult.data) {
           const tonPrice = priceResult.data.tonPrice;
           
-          const convertResponse = await fetch('/api/telegram/convert-price', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ tonAmount: tonPrice })
-          });
-
-          const convertResult = await convertResponse.json();
+          const convertResult = await apiPost<any>('/api/telegram/convert-price', { tonAmount: tonPrice });
           
           if (convertResult.success && convertResult.data) {
             const baseTomanPrice = convertResult.data.tomanAmount;
@@ -400,22 +346,15 @@ export default function StarsPage() {
     setShowConfirmModal(false);
 
     try {
-      const response = await fetch('/api/telegram/stars-buy', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          recipient: foundUser.recipient,
-          username: foundUser.username,
-          name: foundUser.name,
-          quantity: pendingPurchase.stars,
-          userTelegramID: userInfo.id,
-          price: pendingPurchase.price
-        })
+      const { apiPost } = await import('@/utils/api');
+      const result = await apiPost<any>('/api/telegram/stars-buy', {
+        recipient: foundUser.recipient,
+        username: foundUser.username,
+        name: foundUser.name,
+        quantity: pendingPurchase.stars,
+        userTelegramID: userInfo.id,
+        price: pendingPurchase.price
       });
-
-      const result = await response.json();
       
       if (result.success && result.data?.transaction?.messages?.length > 0) {
         // هدایت به صفحه موفقیت با اطلاعات تراکنش
@@ -701,7 +640,7 @@ export default function StarsPage() {
                 <div className="absolute top-1/2 left-3 transform -translate-y-1/2 flex items-center gap-1">
                   <Cash01Icon className="h-4 w-4" style={{ color: 'var(--field-accent-color)' }} />
                   <span className="font-semibold text-sm text-white">
-                    {priceData.tomanPrice.toLocaleString('en-US')}
+                    {Math.floor(priceData.tomanPrice).toLocaleString('en-US')}
                   </span>
                   <span className="text-xs" style={{ color: 'var(--text-color)' }}>
                     تومان
@@ -756,7 +695,7 @@ export default function StarsPage() {
                      <div className="flex items-center gap-1">
                        <Cash01Icon className="h-4 w-4" style={{ color: 'var(--field-accent-color)' }} />
                        <span className="font-semibold text-sm text-white">
-                         {getPackagePrice(pkg.stars) ? getPackagePrice(pkg.stars)!.tomanPrice.toLocaleString('en-US') : '...'}
+                         {getPackagePrice(pkg.stars) ? Math.floor(getPackagePrice(pkg.stars)!.tomanPrice).toLocaleString('en-US') : '...'}
                        </span>
                        <span className="text-xs" style={{ color: 'var(--text-color)' }}>
                          تومان
@@ -802,7 +741,7 @@ export default function StarsPage() {
                      <div className="flex items-center gap-1">
                        <Cash01Icon className="h-4 w-4" style={{ color: 'var(--field-accent-color)' }} />
                        <span className="font-semibold text-sm text-white">
-                         {getPackagePrice(pkg.stars) ? getPackagePrice(pkg.stars)!.tomanPrice.toLocaleString('en-US') : '...'}
+                         {getPackagePrice(pkg.stars) ? Math.floor(getPackagePrice(pkg.stars)!.tomanPrice).toLocaleString('en-US') : '...'}
                        </span>
                        <span className="text-xs" style={{ color: 'var(--text-color)' }}>
                          تومان
@@ -880,6 +819,7 @@ export default function StarsPage() {
 
           {/* Transaction History Link */}
           <button 
+            onClick={() => window.location.href = '/history'}
             className="w-full text-center py-2"
             style={{ color: 'var(--field-accent-color)' }}
           >

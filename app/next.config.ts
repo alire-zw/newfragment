@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   
+  // تنظیمات experimental (در صورت نیاز)
+  experimental: {
+    // تنظیمات experimental در صورت نیاز اضافه می‌شود
+  },
+  
   // بهینه‌سازی bundle
   // حذف experimental.optimizeCss برای جلوگیری از نیاز به critters
   // و حذف swcMinify که در این نسخه پشتیبانی نمی‌شود

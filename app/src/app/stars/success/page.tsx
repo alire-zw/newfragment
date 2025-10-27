@@ -63,9 +63,9 @@ function StarsPurchaseSuccessContent() {
       try {
         console.log('🔍 [SUCCESS-PAGE] Looking up purchase by successPageId:', successPageId);
         
+        const { apiGet } = await import('@/utils/api');
         // جستجوی خرید بر اساس successPageId
-        const response = await fetch(`/api/stars-purchase/${successPageId}`);
-        const purchaseData = await response.json();
+        const purchaseData = await apiGet<any>(`/api/stars-purchase/${successPageId}`);
         
         if (!purchaseData.success || !purchaseData.data) {
           setError('خرید یافت نشد یا خطا در دریافت اطلاعات');
@@ -92,6 +92,9 @@ function StarsPurchaseSuccessContent() {
               status: 'confirmed'
             }
           });
+          
+          // Trigger wallet update event
+          window.dispatchEvent(new CustomEvent('walletUpdated'));
           setLoading(false);
           return;
         }
@@ -109,21 +112,15 @@ function StarsPurchaseSuccessContent() {
         if (purchase.status === 'pending' && transactionAddress && transactionAmount && transactionPayload) {
           console.log('🚀 [SUCCESS-PAGE] Confirming pending transaction...');
           
-          const confirmResponse = await fetch('/api/telegram/confirm-transaction', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              transaction: {
-                address: transactionAddress,
-                amount: transactionAmount,
-                payload: transactionPayload
-              }
-            })
+          const { apiPost } = await import('@/utils/api');
+          const confirmResult = await apiPost<any>('/api/telegram/confirm-transaction', {
+            transaction: {
+              address: transactionAddress,
+              amount: transactionAmount,
+              payload: transactionPayload
+            }
           });
 
-          const confirmResult = await confirmResponse.json();
           setConfirmationResult(confirmResult);
         } else {
           setConfirmationResult({

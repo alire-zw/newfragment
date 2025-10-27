@@ -25,7 +25,7 @@ export default function WalletChangeModal({
   const [error, setError] = useState<string>('');
 
   const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('fa-IR').format(num);
+    return new Intl.NumberFormat('fa-IR').format(Math.floor(num));
   };
 
   const handleBalanceChange = (value: string) => {
@@ -99,7 +99,7 @@ export default function WalletChangeModal({
                 <span className="text-sm text-white">موجودی فعلی:</span>
               </div>
               <span className="text-sm font-semibold text-white">
-                {formatNumber(currentBalance / 10)} تومان
+                {formatNumber(currentBalance)} تومان
               </span>
             </div>
         </div>

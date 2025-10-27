@@ -80,7 +80,7 @@ function SuccessContent() {
   }, []);
 
   const formatPrice = (price: number) => {
-    return price.toLocaleString('fa-IR');
+    return Math.floor(price).toLocaleString('fa-IR');
   };
 
   // تابع بستن notification
@@ -186,15 +186,8 @@ function SuccessContent() {
       
       console.log('📤 Sending get-code request:', requestData);
       
-      const response = await fetch('/api/virtual-numbers/get-code', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData)
-      });
-
-      const result = await response.json();
+      const { apiPost } = await import('@/utils/api');
+      const result = await apiPost<any>('/api/virtual-numbers/get-code', requestData);
 
       if (result.success) {
         setReceivedCode(result.data.code);

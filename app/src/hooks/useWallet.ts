@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTelegramUser } from './useTelegramUser';
+import { apiGet } from '@/utils/api';
 
 interface WalletData {
   balance: number;
@@ -23,8 +24,9 @@ export function useWallet() {
     setError(null);
     
     try {
-      const response = await fetch(`/api/wallet/balance?telegramId=${userInfo.id}`);
-      const data = await response.json();
+      const data = await apiGet<{ success: boolean; data: WalletData; error?: string }>(
+        `/api/wallet/balance?telegramId=${userInfo.id}`
+      );
       
       if (data.success) {
         setWalletData(data.data);
@@ -33,7 +35,7 @@ export function useWallet() {
       }
     } catch (err) {
       console.error('خطا در دریافت موجودی کیف پول:', err);
-      setError('خطا در ارتباط با سرور');
+      setError(err instanceof Error ? err.message : 'خطا در ارتباط با سرور');
     } finally {
       setLoading(false);
     }
@@ -41,10 +43,30 @@ export function useWallet() {
 
   useEffect(() => {
     fetchWalletBalance();
+    
+    // Auto-refresh هر 30 ثانیه
+    const interval = setInterval(fetchWalletBalance, 30000);
+    
+    // Event listener برای به‌روزرسانی فوری بعد از تراکنش‌ها
+    const handleWalletUpdate = () => {
+      fetchWalletBalance();
+    };
+    
+    window.addEventListener('walletUpdated', handleWalletUpdate);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('walletUpdated', handleWalletUpdate);
+    };
   }, [userInfo?.id]);
 
   const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat('fa-IR').format(amount);
+    return new Intl.NumberFormat('fa-IR').format(Math.floor(amount));
+  };
+
+  // Function برای trigger کردن به‌روزرسانی موجودی از خارج
+  const triggerWalletUpdate = () => {
+    window.dispatchEvent(new CustomEvent('walletUpdated'));
   };
 
   return {
@@ -52,6 +74,7 @@ export function useWallet() {
     loading,
     error,
     refetch: fetchWalletBalance,
+    triggerUpdate: triggerWalletUpdate,
     formatAmount
   };
 }

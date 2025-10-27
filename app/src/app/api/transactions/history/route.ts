@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../../../database/connection';
+import { requireAuth, requireOwnership, handleAuthError } from '@/utils/auth';
 
 export async function GET(request: NextRequest) {
   let connection;
   
   try {
+    // 🔒 احراز هویت
+    const authenticatedUserId = await requireAuth(request);
+
     const { searchParams } = new URL(request.url);
     const telegramId = searchParams.get('telegramId');
     const page = parseInt(searchParams.get('page') || '1');
@@ -16,6 +20,9 @@ export async function GET(request: NextRequest) {
         error: 'شناسه تلگرام الزامی است'
       }, { status: 400 });
     }
+
+    // 🔒 چک کردن اینکه کاربر فقط تراکنش‌های خودش را ببیند (یا ادمین باشد)
+    await requireOwnership(request, parseInt(telegramId), true);
 
     // اتصال به دیتابیس
     connection = await pool.getConnection();
@@ -39,6 +46,14 @@ export async function GET(request: NextRequest) {
     // محاسبه offset
     const offset = (page - 1) * limit;
 
+    console.log('🔍 Transaction history query params:', {
+      actualUserId,
+      limit,
+      offset,
+      limitType: typeof limit,
+      offsetType: typeof offset
+    });
+
     // دریافت تراکنش‌ها
     const [transactionRows] = await connection.execute(
       `SELECT 
@@ -47,8 +62,8 @@ export async function GET(request: NextRequest) {
        FROM transactions 
        WHERE userID = ? 
        ORDER BY createdAt DESC 
-       LIMIT ? OFFSET ?`,
-      [actualUserId, limit, offset]
+       LIMIT ${limit} OFFSET ${offset}`,
+      [actualUserId]
     );
 
     // شمارش کل تراکنش‌ها
@@ -78,11 +93,12 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
+    const { message, status } = handleAuthError(error);
     console.error('❌ Error fetching transaction history:', error);
     return NextResponse.json({
       success: false,
-      error: 'خطا در دریافت تاریخچه تراکنش‌ها'
-    }, { status: 500 });
+      error: message
+    }, { status });
   } finally {
     if (connection) {
       connection.release();

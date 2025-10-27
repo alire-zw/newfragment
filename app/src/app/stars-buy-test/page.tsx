@@ -62,15 +62,8 @@ export default function StarsBuyTestPage() {
     setResult(null);
 
     try {
-      const response = await fetch('/api/telegram/stars-buy', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await response.json();
+      const { apiPost } = await import('@/utils/api');
+      const data = await apiPost<any>('/api/telegram/stars-buy', formData);
       setResult(data);
       
       // اگر درخواست موفق بود، مودال تایید تراکنش را نمایش بده

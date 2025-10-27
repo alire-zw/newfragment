@@ -38,8 +38,8 @@ export default function HistoryPage() {
     setError('');
     
     try {
-      const response = await fetch(`/api/transactions/history?telegramId=${userInfo.id}&page=${page}&limit=20`);
-      const data = await response.json();
+      const { apiGet } = await import('@/utils/api');
+      const data = await apiGet<any>(`/api/transactions/history?telegramId=${userInfo.id}&page=${page}&limit=20`);
       
       if (data.success) {
         setTransactions(data.data.transactions);
@@ -52,7 +52,7 @@ export default function HistoryPage() {
       }
     } catch (err) {
       console.error('خطا در دریافت تاریخچه تراکنش‌ها:', err);
-      setError('خطا در ارتباط با سرور');
+      setError(err instanceof Error ? err.message : 'خطا در ارتباط با سرور');
     } finally {
       setLoading(false);
     }

@@ -16,6 +16,7 @@ export interface TelegramWebApp {
   ready: () => void;
   expand: () => void;
   close: () => void;
+  openLink?: (url: string, options?: { try_browser?: boolean }) => void;
   MainButton: {
     text: string;
     color: string;
@@ -68,6 +69,9 @@ export function initializeTelegramWebApp(): void {
     if (tg && typeof tg.ready === 'function') {
       tg.ready();
       console.log('Telegram WebApp initialized');
+      if (typeof tg.expand === 'function') {
+        tg.expand();
+      }
     }
   } catch (error) {
     console.warn('Failed to initialize Telegram WebApp:', error);
@@ -78,6 +82,8 @@ export function initializeTelegramWebApp(): void {
 export function getTelegramUser(): TelegramUser | null {
   try {
     const tg = getTelegramWebApp();
+    console.log('📱 Full initDataUnsafe:', tg?.initDataUnsafe);
+    console.log('📱 initData (raw):', (tg as any)?.initData);
     return tg?.initDataUnsafe?.user || null;
   } catch (error) {
     console.warn('Error getting Telegram user:', error);
@@ -160,5 +166,26 @@ export function detectTelegramEnvironment(): void {
     if (userFromHash) {
       console.log('User data available in hash');
     }
+  }
+}
+
+// Open link strictly inside Telegram WebApp when possible
+export function openLinkInTelegramWebApp(url: string): void {
+  try {
+    const tg = getTelegramWebApp();
+    if (tg && typeof tg.openLink === 'function') {
+      try {
+        tg.openLink(url, { try_browser: false });
+        return;
+      } catch (e) {
+        // fallback below
+      }
+    }
+  } catch (_) {
+    // ignore
+  }
+  // Fallback: navigate in the same webview/tab
+  if (typeof window !== 'undefined') {
+    window.location.assign(url);
   }
 }

@@ -19,9 +19,9 @@ export async function GET(request: NextRequest) {
     // اتصال به دیتابیس
     connection = await pool.getConnection();
     
-    // پیدا کردن userID از telegramID
+    // پیدا کردن userID از telegramID (بهینه‌تر: استفاده از index)
     const [userRows] = await connection.execute(
-      'SELECT userID FROM users WHERE userTelegramID = ?',
+      'SELECT userID FROM users WHERE userTelegramID = ? LIMIT 1',
       [parseInt(telegramId)]
     );
 
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     const user = userRows[0] as { userID: string };
     const actualUserId = user.userID;
 
-    // دریافت شماره‌های مجازی کاربر
+    // دریافت شماره‌های مجازی کاربر (بهینه‌تر: محدود کردن نتایج)
     let query = `SELECT 
       virtualNumberID, number, requestID, price, country, 
       countryCode, phoneRange, service, quality, status, 
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
      FROM virtual_numbers 
      WHERE userID = ?`;
     
-    const params = [actualUserId];
+    const params: any[] = [actualUserId];
     
     // اگر virtualNumberId مشخص شده، فقط آن شماره را برگردان
     if (virtualNumberId) {
@@ -51,7 +51,8 @@ export async function GET(request: NextRequest) {
       params.push(virtualNumberId);
     }
     
-    query += ' ORDER BY createdAt DESC';
+    // محدود کردن نتایج برای بهبود کارایی
+    query += ' ORDER BY createdAt DESC LIMIT 100';
     
     const [virtualNumberRows] = await connection.execute(query, params);
 

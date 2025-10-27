@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "../styles/fonts.css";
-import Header from "@/components/Header";
+import Header from "../components/Header";
 
 export const metadata: Metadata = {
   title: "فرانوم بات",
@@ -14,11 +14,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl">
+    <html lang="fa" dir="rtl" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="msapplication-tap-highlight" content="no" />
+        
+        {/* Telegram WebApp Script - باید اول لود شود */}
+        <script src="https://telegram.org/js/telegram-web-app.js" async></script>
+        
         <script src="/disable-zoom.js" defer></script>
         <script
           dangerouslySetInnerHTML={{
@@ -62,7 +66,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased" suppressHydrationWarning>
         <Header />
         <main className="pt-24">
           {children}

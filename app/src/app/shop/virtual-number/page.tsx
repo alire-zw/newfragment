@@ -33,16 +33,11 @@ export default function VirtualNumberPage() {
   useEffectReact(() => {
     const fetchProfitPercentage = async () => {
       try {
-        const response = await fetch('/api/admin/settings');
-        const data = await response.json();
+        const { apiGet } = await import('@/utils/api');
+        const data = await apiGet<any>('/api/settings/public');
         
-        if (data.success) {
-          const virtualNumberSetting = data.data.find((setting: any) => 
-            setting.setting_key === 'virtual_number_profit_percentage'
-          );
-          if (virtualNumberSetting) {
-            setProfitPercentage(parseFloat(virtualNumberSetting.setting_value) || 0);
-          }
+        if (data.success && data.data.virtual_number_profit_percentage) {
+          setProfitPercentage(parseFloat(data.data.virtual_number_profit_percentage) || 0);
         }
       } catch (error) {
         console.error('خطا در دریافت درصد سود:', error);
@@ -85,7 +80,7 @@ export default function VirtualNumberPage() {
   const formatPrice = (price: number) => {
     // اضافه کردن درصد سود به قیمت
     const priceWithProfit = price + (price * profitPercentage / 100);
-    return priceWithProfit.toLocaleString('en-US');
+    return Math.floor(priceWithProfit).toLocaleString('en-US');
   };
 
   const handleImageError = (countryId: string) => {

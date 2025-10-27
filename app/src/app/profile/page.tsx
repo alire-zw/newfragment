@@ -32,9 +32,6 @@ export default function ProfilePage() {
   
   // State management
   const [deviceType, setDeviceType] = useState('other');
-  const [tgName, setTgName] = useState('بدون نام');
-  const [tgAvatar, setTgAvatar] = useState(defaultAvatar);
-  const [tgId, setTgId] = useState('123456789');
   const [notification, setNotification] = useState({ show: false, message: '', type: 'success', hiding: false });
 
   // تابع تبدیل وضعیت احراز هویت به متن فارسی
@@ -77,16 +74,20 @@ export default function ProfilePage() {
 
   // تابع کپی کردن شناسه کاربری
   const copyUserId = async () => {
+    if (!userInfo) return;
+    
     try {
-      await navigator.clipboard.writeText(tgId);
-      console.log('✅ User ID copied to clipboard:', tgId);
+      const userId = userInfo.id.toString();
+      await navigator.clipboard.writeText(userId);
+      console.log('✅ User ID copied to clipboard:', userId);
       showNotification('شناسه کاربری کپی شد!', 'success');
     } catch (err) {
       console.error('❌ Failed to copy user ID:', err);
       
       try {
+        const userId = userInfo.id.toString();
         const textArea = document.createElement('textarea');
-        textArea.value = tgId;
+        textArea.value = userId;
         document.body.appendChild(textArea);
         textArea.select();
         document.execCommand('copy');
@@ -146,19 +147,10 @@ export default function ProfilePage() {
       console.log('📱 ProfileMain: Other device detected');
     }
     
-    // تنظیم تم اولیه (حذف شده)
-    
     // تنظیم اطلاعات کاربر
     if (userInfo) {
       const fullName = (userInfo.first_name || '') + (userInfo.last_name ? ' ' + userInfo.last_name : '') || 'بدون نام';
-      const userId = userInfo.id ? userInfo.id.toString() : '123456789';
-      const userAvatar = userInfo.photo_url || defaultAvatar;
-      
       console.log('👤 User:', fullName);
-      
-      setTgName(fullName);
-      setTgId(userId);
-      setTgAvatar(userAvatar);
       
       // ذخیره اطلاعات کاربر در دیتابیس
       saveUserToDatabase();
@@ -271,16 +263,16 @@ export default function ProfilePage() {
     );
   }
 
-  if (error) {
+  if (error || !userInfo) {
     return (
       <div className={styles.container} style={containerStyle}>
         <div className="text-center py-12">
-          <div className="bg-red-900 border border-red-600 rounded-lg p-6 mx-4">
-            <h2 className="text-xl font-semibold mb-2 text-red-200">
-              خطا در بارگذاری پروفایل
+          <div className="bg-blue-900 border border-blue-600 rounded-lg p-6 mx-4">
+            <h2 className="text-xl font-semibold mb-2 text-blue-200">
+              لطفاً از طریق تلگرام وارد شوید
             </h2>
-            <p className="text-sm text-red-100">
-              {error}
+            <p className="text-sm text-blue-100">
+              {error || 'برای استفاده از این سرویس، باید از طریق مینی‌اپ تلگرام وارد شوید'}
             </p>
           </div>
         </div>
@@ -313,12 +305,19 @@ export default function ProfilePage() {
         <div className={styles.header}>
         <div className={styles.profileInfo}>
           <div className={styles.avatar}>
-            <Image src={tgAvatar} alt="avatar" width={56} height={56} />
+            <Image 
+              src={userInfo.photo_url || defaultAvatar} 
+              alt="avatar" 
+              width={56} 
+              height={56} 
+            />
           </div>
           <div className={styles.profileText}>
-            <div className={styles.name}>{tgName}</div>
+            <div className={styles.name}>
+              {(userInfo.first_name || '') + (userInfo.last_name ? ' ' + userInfo.last_name : '') || 'بدون نام'}
+            </div>
             <div className={styles.userId}>
-              شناسه کاربری: {tgId}
+              شناسه کاربری: {userInfo.id}
               <span className={styles.copyIcon} onClick={copyUserId} title="کپی شناسه کاربری">
                 <CopyIcon color="var(--field-second-color)" size={14} />
               </span>

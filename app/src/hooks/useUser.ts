@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTelegramUser } from './useTelegramUser';
 import { useReferral } from './useReferral';
+import { apiGet, apiPost } from '@/utils/api';
 
 export interface User {
   id?: number;
@@ -25,20 +26,7 @@ export const useUser = () => {
   // ذخیره اطلاعات کاربر در دیتابیس
   const saveUser = async (userData: Partial<User>) => {
     try {
-      const response = await fetch('/api/users/save', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'خطا در ذخیره اطلاعات کاربر');
-      }
-
+      const result = await apiPost<{ user: User }>('/api/users/save', userData);
       setUser(result.user);
       return result.user;
     } catch (err) {
@@ -51,19 +39,14 @@ export const useUser = () => {
   // دریافت اطلاعات کاربر از دیتابیس
   const fetchUser = async (telegramID: number) => {
     try {
-      const response = await fetch(`/api/users/get?telegramID=${telegramID}`);
-      const result = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          // کاربر در دیتابیس وجود ندارد
-          return null;
-        }
-        throw new Error(result.error || 'خطا در دریافت اطلاعات کاربر');
-      }
-
+      const result = await apiGet<{ user: User }>(`/api/users/get?telegramID=${telegramID}`);
       return result.user;
     } catch (err) {
+      // اگر 404 بود یا پیام "کاربر یافت نشد"، کاربر وجود نداره
+      if (err instanceof Error && (err.message.includes('404') || err.message.includes('کاربر یافت نشد'))) {
+        console.log('ℹ️ کاربر در دیتابیس یافت نشد، کاربر جدید محسوب می‌شود');
+        return null;
+      }
       console.error('❌ خطا در دریافت کاربر:', err);
       setError(err instanceof Error ? err.message : 'خطای نامشخص');
       throw err;
@@ -107,6 +90,8 @@ export const useUser = () => {
 
   // ذخیره خودکار کاربر هنگام ورود
   useEffect(() => {
+    let isMounted = true;
+
     const handleUserSave = async () => {
       if (!userInfo || telegramLoading) return;
 
@@ -114,14 +99,19 @@ export const useUser = () => {
       setError(null);
 
       try {
+        console.log('🔍 بررسی وجود کاربر در دیتابیس...', userInfo.id);
         // ابتدا بررسی کنیم که کاربر در دیتابیس وجود دارد یا نه
         const existingUser = await fetchUser(userInfo.id);
         
+        if (!isMounted) return;
+
         if (existingUser) {
           // کاربر موجود است
+          console.log('✅ کاربر موجود یافت شد:', existingUser.userID);
           setUser(existingUser);
         } else {
           // کاربر جدید است، اطلاعاتش را ذخیره کنیم
+          console.log('➕ کاربر جدید، در حال ذخیره...');
           const fullName = (userInfo.first_name || '') + (userInfo.last_name ? ' ' + userInfo.last_name : '') || 'بدون نام';
           const username = userInfo.username || `user_${userInfo.id}`;
           
@@ -135,22 +125,34 @@ export const useUser = () => {
             isVerified: false
           });
 
+          if (!isMounted) return;
+
+          console.log('✅ کاربر جدید ذخیره شد:', newUser.userID);
           setUser(newUser);
         }
 
         // پردازش پارامتر startapp
-        await processStartAppParam();
+        if (isMounted) {
+          await processStartAppParam();
+        }
 
       } catch (err) {
+        if (!isMounted) return;
         console.error('❌ خطا در مدیریت کاربر:', err);
         setError(err instanceof Error ? err.message : 'خطای نامشخص');
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     handleUserSave();
-  }, [userInfo, telegramLoading, processStartAppParam]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [userInfo?.id, telegramLoading]);
 
   return {
     user,

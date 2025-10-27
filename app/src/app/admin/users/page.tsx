@@ -49,8 +49,8 @@ export default function AdminUsersPage() {
     const fetchUsers = async () => {
       try {
         setUsersLoading(true);
-        const response = await fetch('/api/admin/users');
-        const data = await response.json();
+        const { apiGet } = await import('@/utils/api');
+        const data = await apiGet<any>('/api/admin/users');
         
         if (data.success) {
           setUsers(data.data);

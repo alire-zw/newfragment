@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../../../database/connection';
-import { WalletService } from '../../../../../database/WalletService';
-import { StarsPurchaseService } from '../../../../../database/StarsPurchaseService';
+import { WalletService as DbWalletService } from '../../../../../database/WalletService';
+import { StarsPurchaseService } from '@/database/StarsPurchaseService';
+import { requireAuth, requireOwnership, handleAuthError } from '@/utils/auth';
+import { logAudit, getRequestMetadata } from '@/utils/audit';
+import { purchaseRateLimit } from '@/utils/rateLimit';
 
 interface StarsBuyRequest {
   recipient: string;
@@ -32,12 +35,34 @@ export async function POST(request: NextRequest) {
   let purchaseID: string | undefined;
   let starsPurchase: any = null;
   let successPageId: string | undefined;
+  let walletCharged = false;
+  let refunded = false;
+  let requestUserTelegramID: number | null = null;
+  let requestPriceInRials: number | null = null;
   
   try {
     console.log('🚀 [STARS-BUY] Starting stars purchase request');
+
+    // 🔒 احراز هویت
+    const authenticatedUserId = await requireAuth(request);
     
     const body: StarsBuyRequest = await request.json();
     const { recipient, username, name, quantity, userTelegramID, price } = body;
+    requestUserTelegramID = userTelegramID;
+    const priceInRials = price * 10; // تبدیل تومان به ریال (1 تومان = 10 ریال)
+    requestPriceInRials = priceInRials;
+
+    // 🔒 چک کردن اینکه کاربر فقط برای خودش خرید کند
+    await requireOwnership(request, userTelegramID, false);
+
+    // 🔒 Rate limiting برای خریدها
+    const canProceed = await purchaseRateLimit(`purchase:stars:${authenticatedUserId}`);
+    if (!canProceed) {
+      return NextResponse.json({
+        success: false,
+        error: 'تعداد درخواست‌های شما بیش از حد مجاز است. لطفاً کمی صبر کنید.'
+      } as StarsBuyResponse, { status: 429 });
+    }
 
     console.log('📥 [STARS-BUY] Request data:', {
       recipient: recipient,
@@ -142,10 +167,7 @@ export async function POST(request: NextRequest) {
 
       // 2. دریافت یا ایجاد کیف پول
       console.log('💰 [STARS-BUY] Getting or creating wallet...');
-      const wallet = await WalletService.getOrCreateWallet(actualUserID, userTelegramID);
-      
-      // تبدیل تومان به ریال (1 تومان = 10 ریال)
-      const priceInRials = price * 10;
+      const wallet = await DbWalletService.getOrCreateWallet(actualUserID, userTelegramID);
       
       console.log('💰 [STARS-BUY] Balance check:', { 
         walletBalance: wallet.balance, 
@@ -161,7 +183,7 @@ export async function POST(request: NextRequest) {
 
       // 3. کسر موجودی از کیف پول (به ریال)
       console.log('💸 [STARS-BUY] Subtracting balance from wallet...');
-      const balanceUpdated = await WalletService.subtractBalance(userTelegramID, priceInRials);
+      const balanceUpdated = await DbWalletService.subtractBalance(userTelegramID, priceInRials);
       
       if (!balanceUpdated) {
         console.error('❌ [STARS-BUY] Failed to subtract balance');
@@ -169,6 +191,7 @@ export async function POST(request: NextRequest) {
       }
 
       console.log('✅ [STARS-BUY] Balance subtracted successfully');
+      walletCharged = true;
 
       // 4. ایجاد خرید استارز در دیتابیس
       purchaseID = `STARS_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -176,6 +199,7 @@ export async function POST(request: NextRequest) {
       console.log('📝 [STARS-BUY] Creating stars purchase record:', { purchaseID, successPageId });
       
       starsPurchase = await StarsPurchaseService.createPurchase({
+        purchaseID: purchaseID,
         userID: actualUserID,
         userTelegramID: userTelegramID,
         recipient: recipient,
@@ -189,7 +213,8 @@ export async function POST(request: NextRequest) {
       });
 
       console.log('✅ [STARS-BUY] Stars purchase record created:', { 
-        purchaseID: starsPurchase.id,
+        id: starsPurchase.id,
+        purchaseID: starsPurchase.purchaseID,
         status: starsPurchase.status
       });
 
@@ -236,17 +261,13 @@ export async function POST(request: NextRequest) {
       console.log('🔓 [STARS-BUY] Database connection released');
     }
 
-    // کوکی‌های بروزرسانی شده
+    // کوکی‌های بروزرسانی شده از cookieManager
     console.log('🌐 [STARS-BUY] Preparing external API request...');
-    const cookies = [
-      '__lhash_=f2fc97f9d2b9cc83b86382599686fc18',
-      'session=eyJsb2NhbGUiOiAiZW4iLCAidG9uX3Byb29mIjogIjlkZTRjYzk4MGVmMzE0YWMiLCAiYWRkcmVzcyI6ICIwOmExYzVhYTNjZDhiOGZkMTczZGRmMGM2M2EwMTczZDc2NTMwMTdiYjRhZmJkNjM3NGY0ZWRlMDdkOGQ5YzI5MGMiLCAicmVmIjogIm9jV3FQTmk0X1JjOTN3eGpvQmM5ZGxNQmU3U3Z2V04wOU8zZ2ZZMmNLUXc9IiwgImRuc19yZWNvcmQiOiAiIiwgImFwcF9uYW1lIjogInRvbmtlZXBlciB3aW5kb3dzIiwgIm1heF9tZXNzYWdlcyI6IDR9.aMNNRw.xCdNaaeHSxyq2JizDHWol-se3GQ',
-      '_ym_uid=1755247663760478843',
-      '_ym_d=1757629548',
-      '_ym_isad=2',
-      '_ym_visorc=w',
-      '__js_p_=566,1800,0,0,0'
-    ].join('; ');
+    const { getCurrentCookies, cookiesToString } = await import('@/utils/cookieManager');
+    const currentCookies = getCurrentCookies();
+    const cookies = cookiesToString(currentCookies);
+    
+    console.log('🍪 [STARS-BUY] Using cookies:', cookies.substring(0, 100) + '...');
 
     // درخواست به API خرید استارز
     console.log('🚀 [STARS-BUY] Calling external API...');
@@ -267,7 +288,7 @@ export async function POST(request: NextRequest) {
         'Sec-Fetch-Mode': 'cors',
         'Sec-Fetch-Site': 'same-origin',
         'TE': 'trailers',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:142.0) Gecko/20100101 Firefox/142.0'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:144.0) Gecko/20100101 Firefox/144.0'
       },
       body: JSON.stringify({
         recipient: recipient.trim(),
@@ -310,6 +331,40 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ [STARS-BUY] External API call successful');
+    
+    // Check if response is HTML instead of JSON
+    const contentType = response.headers.get('content-type');
+    console.log('🔍 [STARS-BUY] Response content-type:', contentType);
+    
+    if (contentType && contentType.includes('text/html')) {
+      const htmlText = await response.text();
+      console.log('⚠️ [STARS-BUY] Received HTML response instead of JSON');
+      console.log('📄 [STARS-BUY] HTML response preview:', htmlText.substring(0, 200) + '...');
+      
+      // Check for common error patterns in HTML
+      if (htmlText.includes('Unknown Error') || htmlText.includes('Error')) {
+        console.error('❌ [STARS-BUY] Server returned error page');
+        return NextResponse.json({
+          success: false,
+          error: 'سرور خطا برمی‌گرداند. لطفاً دوباره تلاش کنید.'
+        } as StarsBuyResponse, { status: 500 });
+      }
+      
+      if (htmlText.includes('Rate limit') || htmlText.includes('Too many requests')) {
+        console.error('❌ [STARS-BUY] Rate limited');
+        return NextResponse.json({
+          success: false,
+          error: 'تعداد درخواست‌ها بیش از حد مجاز است. لطفاً کمی صبر کنید.'
+        } as StarsBuyResponse, { status: 429 });
+      }
+      
+      console.error('❌ [STARS-BUY] Unexpected HTML response');
+      return NextResponse.json({
+        success: false,
+        error: 'سرور پاسخ غیرمنتظره برمی‌گرداند. لطفاً دوباره تلاش کنید.'
+      } as StarsBuyResponse, { status: 500 });
+    }
+    
     const data = await response.json();
     console.log('📥 [STARS-BUY] External API response data:', {
       hasTransaction: !!data.transaction,
@@ -327,7 +382,50 @@ export async function POST(request: NextRequest) {
         payloadLength: message.payload?.length || 0
       });
       
-      await StarsPurchaseService.updatePurchaseStatus(purchaseID, 'completed', {
+      // تایید تراکنش در ولت (بدون ریتری)
+      console.log('🔧 [STARS-BUY] Confirming transaction in wallet...');
+      const TonWalletService = (await import('../../../../services/WalletService')).default;
+      const walletService = new TonWalletService();
+      const confirmResult = await walletService.confirmStarsTransaction({
+        address: message.address,
+        amount: message.amount,
+        payload: message.payload
+      });
+
+      if (!confirmResult.success) {
+        console.error('❌ [STARS-BUY] Wallet confirmation failed:', confirmResult.error);
+        // بروزرسانی وضعیت خرید به failed
+        try {
+          await StarsPurchaseService.updatePurchaseStatus(starsPurchase.purchaseID, 'failed', {
+            metadata: {
+              error: `تایید تراکنش در ولت ناموفق: ${confirmResult.error}`,
+              externalResponse: data
+            }
+          });
+        } catch (e) {
+          console.error('❌ [STARS-BUY] Error updating purchase status to failed after wallet error:', e);
+        }
+
+        // ریفاند کیف پول در صورت کسر قبلی
+        if (walletCharged && !refunded) {
+          try {
+            const refundedOk = await DbWalletService.addBalance(requestUserTelegramID as number, requestPriceInRials as number);
+            refunded = refundedOk;
+            console.log(refundedOk ? '✅ [STARS-BUY] Wallet refunded successfully' : '⚠️ [STARS-BUY] Wallet refund did not affect any row');
+          } catch (e) {
+            console.error('❌ [STARS-BUY] Error refunding wallet:', e);
+          }
+        }
+
+        return NextResponse.json({
+          success: false,
+          error: 'خطا در تایید تراکنش ولت. مبلغ به کیف پول بازگشت داده شد.'
+        } as StarsBuyResponse, { status: 502 });
+      }
+      
+      console.log('✅ [STARS-BUY] Wallet confirmation successful');
+      
+      await StarsPurchaseService.updatePurchaseStatus(starsPurchase.purchaseID, 'completed', {
         externalTransactionID: `EXT_${Date.now()}`,
         validUntil: new Date(data.transaction.validUntil * 1000),
         paymentAddress: message.address,
@@ -335,8 +433,20 @@ export async function POST(request: NextRequest) {
         paymentPayload: message.payload,
         metadata: {
           externalResponse: data,
-          purchaseID: purchaseID
+          purchaseID: purchaseID,
+          walletTxHash: confirmResult.txHash
         }
+      });
+
+      // 📝 ثبت لاگ Audit
+      const metadata = getRequestMetadata(request);
+      await logAudit({
+        userId: userTelegramID,
+        action: 'purchase.stars',
+        resourceType: 'stars_purchase',
+        resourceId: purchaseID,
+        details: { quantity, price, recipient, username, name },
+        ...metadata
       });
 
       console.log('✅ [STARS-BUY] Purchase status updated to completed');
@@ -359,7 +469,7 @@ export async function POST(request: NextRequest) {
     } else {
       console.error('❌ [STARS-BUY] Invalid transaction response from external API');
       // بروزرسانی وضعیت خرید به failed
-      await StarsPurchaseService.updatePurchaseStatus(purchaseID, 'failed', {
+      await StarsPurchaseService.updatePurchaseStatus(starsPurchase.purchaseID, 'failed', {
         metadata: {
           error: 'پاسخ نامعتبر از سرور',
           externalResponse: data
@@ -374,6 +484,7 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
+    const { message, status } = handleAuthError(error);
     console.error('💥 [STARS-BUY] Unexpected error:', {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined
@@ -383,7 +494,7 @@ export async function POST(request: NextRequest) {
     try {
       if (typeof purchaseID !== 'undefined') {
         console.log('🔄 [STARS-BUY] Updating purchase status to failed...');
-        await StarsPurchaseService.updatePurchaseStatus(starsPurchase?.id?.toString() || '', 'failed', {
+        await StarsPurchaseService.updatePurchaseStatus(starsPurchase?.purchaseID || '', 'failed', {
           metadata: {
             error: error instanceof Error ? error.message : 'خطای داخلی سرور',
             stack: error instanceof Error ? error.stack : undefined
@@ -394,11 +505,24 @@ export async function POST(request: NextRequest) {
     } catch (updateError) {
       console.error('❌ [STARS-BUY] Error updating purchase status:', updateError);
     }
+
+    // ریفاند کیف پول در صورت کسر قبلی و عدم ریفاند
+    try {
+      if (walletCharged && !refunded) {
+        console.log('🔄 [STARS-BUY] Refunding wallet after error...');
+        const refundedOk = await DbWalletService.addBalance(requestUserTelegramID as number, requestPriceInRials as number);
+        refunded = refundedOk;
+        console.log(refundedOk ? '✅ [STARS-BUY] Wallet refunded successfully' : '⚠️ [STARS-BUY] Wallet refund did not affect any row');
+      }
+    } catch (refundError) {
+      console.error('❌ [STARS-BUY] Error refunding wallet after error:', refundError);
+    }
     
     console.error('❌ [STARS-BUY] Stars purchase failed');
+    const { message: errorMessage, status: errorStatus } = handleAuthError(error);
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : 'خطای داخلی سرور'
-    } as StarsBuyResponse, { status: 500 });
+      error: error instanceof Error ? error.message : errorMessage
+    } as StarsBuyResponse, { status: error instanceof Error && (error.message.includes('احراز هویت') || error.message.includes('دسترسی')) ? errorStatus : 500 });
   }
 }

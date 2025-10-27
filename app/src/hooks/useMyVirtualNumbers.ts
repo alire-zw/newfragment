@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTelegramUser } from './useTelegramUser';
+import { apiGet } from '@/utils/api';
 
 export interface MyVirtualNumber {
   virtualNumberID: string;
@@ -34,8 +35,9 @@ export function useMyVirtualNumbers() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/virtual-numbers/my-numbers?telegramId=${userInfo.id}`);
-      const data = await response.json();
+      const data = await apiGet<{ success: boolean; data: { virtualNumbers: MyVirtualNumber[] }; error?: string }>(
+        `/api/virtual-numbers/my-numbers?telegramId=${userInfo.id}`
+      );
 
       if (data.success) {
         setVirtualNumbers(data.data.virtualNumbers);
@@ -44,7 +46,7 @@ export function useMyVirtualNumbers() {
       }
     } catch (err) {
       console.error('خطا در دریافت شماره‌های مجازی:', err);
-      setError('خطا در ارتباط با سرور');
+      setError(err instanceof Error ? err.message : 'خطا در ارتباط با سرور');
     } finally {
       setLoading(false);
     }

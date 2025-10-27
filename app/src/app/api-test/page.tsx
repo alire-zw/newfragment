@@ -28,8 +28,8 @@ export default function ApiTestPage() {
     // تست 1: اولین درخواست (Cache Miss)
     console.log('🧪 Test 1: First request (Cache Miss)');
     const start1 = Date.now();
-    const response1 = await fetch('/api/prices/1?token=221898889:p55zM1yb4061933WDQXB6KaFCDAQSdh4yaEW6521EJJ1');
-    const data1 = await response1.json();
+    const { apiGet } = await import('@/utils/api');
+    const data1 = await apiGet<any>('/api/prices/1?token=221898889:p55zM1yb4061933WDQXB6KaFCDAQSdh4yaEW6521EJJ1');
     const time1 = Date.now() - start1;
     
     results.push({
@@ -43,8 +43,7 @@ export default function ApiTestPage() {
     // تست 2: درخواست دوم (Cache Hit)
     console.log('🧪 Test 2: Second request (Cache Hit)');
     const start2 = Date.now();
-    const response2 = await fetch('/api/prices/1?token=221898889:p55zM1yb4061933WDQXB6KaFCDAQSdh4yaEW6521EJJ1');
-    const data2 = await response2.json();
+    const data2 = await apiGet<any>('/api/prices/1?token=221898889:p55zM1yb4061933WDQXB6KaFCDAQSdh4yaEW6521EJJ1');
     const time2 = Date.now() - start2;
     
     results.push({
@@ -58,8 +57,7 @@ export default function ApiTestPage() {
     // تست 3: درخواست سوم (Cache Hit)
     console.log('🧪 Test 3: Third request (Cache Hit)');
     const start3 = Date.now();
-    const response3 = await fetch('/api/prices/1?token=221898889:p55zM1yb4061933WDQXB6KaFCDAQSdh4yaEW6521EJJ1');
-    const data3 = await response3.json();
+    const data3 = await apiGet<any>('/api/prices/1?token=221898889:p55zM1yb4061933WDQXB6KaFCDAQSdh4yaEW6521EJJ1');
     const time3 = Date.now() - start3;
     
     results.push({

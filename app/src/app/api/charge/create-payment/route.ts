@@ -72,8 +72,12 @@ export async function POST(request: NextRequest) {
     // تبدیل تومان به ریال (1 تومان = 10 ریال)
     const amountInRials = amount * 10;
     
-    // URL callback (باید در production تغییر کند)
-    const callbackUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/charge/callback`;
+    // URL callback - مستقیماً به API callback برگردد (نه صفحه)
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://app.numberstar.shop';
+    const callbackUrl = `${baseUrl}/api/charge/callback`;
+    
+    console.log('🔗 Callback URL:', callbackUrl);
+    console.log('🔗 Base URL:', baseUrl);
 
     // آماده‌سازی داده‌های درخواست زیبال
     const requestData: {
@@ -140,6 +144,7 @@ export async function POST(request: NextRequest) {
 
     if (data.result === 100) {
       const trackId = data.trackId;
+      // URL شروع پرداخت زیبال
       const paymentUrl = `${ZIBAL_CONFIG.startUrl}/${trackId}`;
 
       console.log('✅ Payment created successfully:', {

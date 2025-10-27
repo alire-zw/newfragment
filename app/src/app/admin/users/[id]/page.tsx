@@ -69,9 +69,10 @@ export default function UserDetailsPage() {
         setLoading(true);
         setError(null);
         
+        const { apiGet } = await import('@/utils/api');
+        
         // دریافت اطلاعات کاربر
-        const userResponse = await fetch(`/api/admin/users/${userId}`);
-        const userData = await userResponse.json();
+        const userData = await apiGet<any>(`/api/admin/users/${userId}`);
         
         if (!userData.success) {
           throw new Error(userData.error || 'کاربر یافت نشد');
@@ -80,8 +81,7 @@ export default function UserDetailsPage() {
         setUser(userData.data);
         
         // دریافت آمار کاربر
-        const statsResponse = await fetch(`/api/admin/users/${userId}/stats`);
-        const statsData = await statsResponse.json();
+        const statsData = await apiGet<any>(`/api/admin/users/${userId}/stats`);
         
          if (statsData.success) {
            setUserStats(statsData.data);
@@ -118,7 +118,7 @@ export default function UserDetailsPage() {
   };
 
   const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('fa-IR').format(num);
+    return new Intl.NumberFormat('fa-IR').format(Math.floor(num));
   };
 
   const formatPrice = (price: number) => {
@@ -133,15 +133,8 @@ export default function UserDetailsPage() {
     }
 
     try {
-      const response = await fetch('/api/telegram/username', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username: username.trim() })
-      });
-
-      const data = await response.json();
+      const { apiPost } = await import('@/utils/api');
+      const data = await apiPost<any>('/api/telegram/username', { username: username.trim() });
       
       if (data.success && data.data && data.data.photo) {
         setUserAvatar(data.data.photo);
@@ -163,15 +156,8 @@ export default function UserDetailsPage() {
       // تبدیل تومان به ریال (ضرب در 10)
       const rialBalance = newBalance * 10;
       
-      const response = await fetch(`/api/admin/users/${user.userTelegramID}/wallet`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ balance: rialBalance })
-      });
-
-      const data = await response.json();
+      const { apiPut } = await import('@/utils/api');
+      const data = await apiPut<any>(`/api/admin/users/${user.userTelegramID}/wallet`, { balance: rialBalance });
       
       if (data.success) {
         // به‌روزرسانی موجودی در state (ریال)
@@ -443,7 +429,7 @@ export default function UserDetailsPage() {
                         <div className="text-sm text-white">مجموع خریدها</div>
                       </div>
                       <div className="text-sm font-bold text-white">
-                        {formatNumber(userStats.totalSpent)} تومان
+                        {formatNumber(userStats.totalSpent / 10)} تومان
                       </div>
                     </div>
                   </div>

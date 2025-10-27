@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTelegramUser } from './useTelegramUser';
+import { apiGet, apiPost } from '@/utils/api';
 
 export interface ReferralStats {
   totalReferrals: number;
@@ -24,13 +25,7 @@ export const useReferral = () => {
   // دریافت آمار رفرال
   const fetchReferralStats = async (telegramID: number) => {
     try {
-      const response = await fetch(`/api/referrals/stats?telegramID=${telegramID}`);
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'خطا در دریافت آمار رفرال');
-      }
-
+      const result = await apiGet<{ stats: ReferralStats }>(`/api/referrals/stats?telegramID=${telegramID}`);
       setStats(result.stats);
     } catch (err) {
       console.error('❌ خطا در دریافت آمار رفرال:', err);
@@ -43,18 +38,10 @@ export const useReferral = () => {
   // پردازش پارامتر startapp
   const processStartApp = async (telegramID: number, startAppParam: string) => {
     try {
-      const response = await fetch('/api/referrals/process', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          telegramID,
-          startAppParam
-        }),
+      const result = await apiPost('/api/referrals/process', {
+        telegramID,
+        startAppParam
       });
-
-      const result = await response.json();
       return result;
     } catch (err) {
       console.error('❌ خطا در پردازش رفرال:', err);

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getCurrentCookies, cookiesToString, isCookieExpired, isRateLimited } from '@/utils/cookieManager';
 
 interface PremiumRecipientRequest {
   username: string;
@@ -51,19 +52,11 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ [PREMIUM-RECIPIENT] Input validation passed');
 
-    // کوکی‌های بروزرسانی شده (مطابق با درخواست جدید)
-    const cookies = [
-      '__lhash_=f2fc97f9d2b9cc83b86382599686fc18',
-      'session=eyJsb2NhbGUiOiAiZW4iLCAidG9uX3Byb29mIjogIjlkZTRjYzk4MGVmMzE0YWMiLCAiYWRkcmVzcyI6ICIwOmExYzVhYTNjZDhiOGZkMTczZGRmMGM2M2EwMTczZDc2NTMwMTdiYjRhZmJkNjM3NGY0ZWRlMDdkOGQ5YzI5MGMiLCAicmVmIjogIm9jV3FQTmk0X1JjOTN3eGpvQmM5ZGxNQmU3U3Z2V04wOU8zZ2ZZMmNLUXc9IiwgImRuc19yZWNvcmQiOiAiIiwgImFwcF9uYW1lIjogInRvbmtlZXBlciB3aW5kb3dzIiwgIm1heF9tZXNzYWdlcyI6IDR9.aMlmyA.KuqYSHG9ItoH9eFs4OGue7M49-g',
-      '_ym_uid=1755247663760478843',
-      '_ym_d=1757629548',
-      '__js_p_=222,1800,0,0,0',
-      '__jhash_=552',
-      '__jua_=Mozilla%2F5.0%20%28Windows%20NT%2010.0%3B%20Win64%3B%20x64%3B%20rv%3A142.0%29%20Gecko%2F20100101%20Firefox%2F142.0',
-      '__hash_=50d685215ffa13109798b882e1e6ec9b',
-      '_ym_isad=2',
-      '_ym_visorc=w'
-    ].join('; ');
+    // استفاده از کوکی‌های به‌روز از cookieManager
+    const cookies = getCurrentCookies();
+    const cookieString = cookiesToString(cookies);
+    
+    console.log('🍪 [PREMIUM-RECIPIENT] Using updated cookies:', cookieString.substring(0, 100) + '...');
 
     // درخواست به API دریافت کاربر پریمیوم
     console.log('🚀 [PREMIUM-RECIPIENT] Calling external API...');
@@ -74,17 +67,19 @@ export async function POST(request: NextRequest) {
         'Accept-Encoding': 'gzip, deflate, br, zstd',
         'Accept-Language': 'en-US,en;q=0.5',
         'Connection': 'keep-alive',
+        'Content-Length': JSON.stringify({
+          username: username.trim(),
+          months: months.toString()
+        }).length.toString(),
         'Content-Type': 'application/json',
-        'Cookie': cookies,
+        'Cookie': cookieString,
         'Host': 'marketapp.ws',
         'Origin': 'https://marketapp.ws',
-        'Priority': 'u=0',
-        'Referer': 'https://marketapp.ws/fragment/?tab=premium',
+        'Referer': 'https://marketapp.ws/fragment/',
         'Sec-Fetch-Dest': 'empty',
         'Sec-Fetch-Mode': 'cors',
         'Sec-Fetch-Site': 'same-origin',
-        'TE': 'trailers',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:142.0) Gecko/20100101 Firefox/142.0'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:144.0) Gecko/20100101 Firefox/144.0'
       },
       body: JSON.stringify({
         username: username.trim(),
@@ -125,6 +120,41 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ [PREMIUM-RECIPIENT] External API call successful');
+    
+    // Check if response is HTML instead of JSON
+    const contentType = response.headers.get('content-type');
+    console.log('🔍 [PREMIUM-RECIPIENT] Response content-type:', contentType);
+    
+    if (contentType && contentType.includes('text/html')) {
+      console.log('⚠️ [PREMIUM-RECIPIENT] Received HTML response instead of JSON');
+      const htmlText = await response.text();
+      console.log('📄 [PREMIUM-RECIPIENT] HTML response preview:', htmlText.substring(0, 200) + '...');
+      
+      // Check if it's a login page or error page
+      if (isCookieExpired(htmlText)) {
+        console.log('🔐 [PREMIUM-RECIPIENT] Authentication required - cookies may be expired');
+        return NextResponse.json({
+          success: false,
+          error: 'احراز هویت ناموفق - کوکی‌ها منقضی شده‌اند'
+        } as PremiumRecipientResponse, { status: 401 });
+      }
+      
+      // Check if it's a rate limit or blocked page
+      if (isRateLimited(htmlText)) {
+        console.log('🚫 [PREMIUM-RECIPIENT] Rate limited or blocked');
+        return NextResponse.json({
+          success: false,
+          error: 'درخواست محدود شده است'
+        } as PremiumRecipientResponse, { status: 429 });
+      }
+      
+      return NextResponse.json({
+        success: false,
+        error: 'سرور پاسخ HTML برمی‌گرداند',
+        details: 'کوکی‌ها ممکن است منقضی شده باشند'
+      } as PremiumRecipientResponse, { status: 500 });
+    }
+    
     const data = await response.json();
     console.log('📥 [PREMIUM-RECIPIENT] External API response data:', {
       hasRecipient: !!data.recipient,

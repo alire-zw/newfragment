@@ -9,14 +9,14 @@ module.exports = {
   zibal: {
     // Sandbox configuration (for development/testing)
     sandbox: {
-      merchant: '68a6457ea45c72001333cc4a',
+      merchant: 'zibal',
       baseUrl: 'https://gateway.zibal.ir/v1',
       startUrl: 'https://gateway.zibal.ir/start'
     },
     
     // Production configuration
     main: {
-      merchant: '68a6457ea45c72001333cc4a',
+      merchant: 'zibal',
       baseUrl: 'https://gateway.zibal.ir/v1',
       startUrl: 'https://gateway.zibal.ir/start'
     }
@@ -38,7 +38,7 @@ module.exports = {
   database: {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || 'Alireza1380#',
+    password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'franumbot_db'
   },
   

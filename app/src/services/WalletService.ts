@@ -22,26 +22,42 @@ class WalletService {
   private client: TonClient;
   private config: WalletConfig | null = null;
 
-  // کلیدهای پیش‌فرض
-  private defaultMnemonic = [
-    'quantum', 'castle', 'lecture', 'range', 'tourist', 'lunch',
-    'slam', 'early', 'daring', 'innocent', 'sword', 'metal',
-    'shuffle', 'push', 'thumb', 'hurdle', 'pet', 'hockey',
-    'rotate', 'carry', 'involve', 'pumpkin', 'head', 'february'
-  ];
-  
-  private defaultApiKey = '6cb7852c6bfb7e962fb9a3c1e370e17cd77591fef381daedb07dbc627986008b';
-  
-  private defaultAddress = 'UQChxao82Lj9Fz3fDGOgFz12UwF7tK-9Y3T07eB9jZwpDBhG';
-
   constructor(apiKey?: string) {
+    // بررسی وجود environment variables
+    const finalApiKey = process.env.TON_API_KEY || apiKey;
+    
+    if (!finalApiKey) {
+      throw new Error('❌ [WALLET-SERVICE] TON_API_KEY is required. Please set it in your .env file or pass it as parameter.');
+    }
+    
     this.client = new TonClient({
       endpoint: 'https://toncenter.com/api/v2/jsonRPC',
-      apiKey: apiKey || this.defaultApiKey
+      apiKey: finalApiKey
     });
     
-    // تنظیم خودکار کلیدهای پیش‌فرض
-    this.setWalletConfig(this.defaultMnemonic, this.defaultApiKey);
+    // تنظیم کلیدها از environment variables
+    this.initializeWalletConfig();
+  }
+
+  /**
+   * تنظیم اولیه کلیدهای ولت از environment variables
+   */
+  private initializeWalletConfig() {
+    // بررسی وجود environment variables
+    if (!process.env.TON_WALLET_MNEMONIC) {
+      throw new Error('❌ [WALLET-SERVICE] TON_WALLET_MNEMONIC is required. Please set it in your .env file.');
+    }
+
+    if (!process.env.TON_API_KEY) {
+      throw new Error('❌ [WALLET-SERVICE] TON_API_KEY is required. Please set it in your .env file.');
+    }
+
+    console.log('🔑 [WALLET-SERVICE] Using environment variables for wallet configuration');
+    
+    const mnemonic = process.env.TON_WALLET_MNEMONIC.split(' ');
+    const apiKey = process.env.TON_API_KEY;
+
+    this.setWalletConfig(mnemonic, apiKey);
   }
 
   /**
@@ -58,7 +74,10 @@ class WalletService {
    * دریافت آدرس ولت پیش‌فرض
    */
   getDefaultAddress(): string {
-    return this.defaultAddress;
+    if (!process.env.TON_DEFAULT_ADDRESS) {
+      throw new Error('❌ [WALLET-SERVICE] TON_DEFAULT_ADDRESS is required. Please set it in your .env file.');
+    }
+    return process.env.TON_DEFAULT_ADDRESS;
   }
 
   /**
@@ -66,7 +85,7 @@ class WalletService {
    */
   async getCurrentAddress(): Promise<string> {
     if (!this.config) {
-      return this.defaultAddress;
+      return this.getDefaultAddress();
     }
 
     try {
@@ -79,7 +98,7 @@ class WalletService {
       return wallet.address.toString();
     } catch (error) {
       console.error('Error getting current address:', error);
-      return this.defaultAddress;
+      return this.getDefaultAddress();
     }
   }
 

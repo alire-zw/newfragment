@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     // اگر کلیدهای سفارشی ارائه شده، از آنها استفاده کن
     if (mnemonic && Array.isArray(mnemonic) && mnemonic.length === 24) {
       console.log('🔑 [CONFIRM-TRANSACTION] Using custom mnemonic (24 words)');
-      walletService.setWalletConfig(mnemonic, apiKey || walletService['defaultApiKey']);
+      walletService.setWalletConfig(mnemonic, apiKey || process.env.TON_API_KEY || '');
     } else {
       console.log('🔑 [CONFIRM-TRANSACTION] Using default wallet configuration');
     }

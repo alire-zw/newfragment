@@ -4,7 +4,7 @@ require('dotenv').config();
 const config = {
   host: 'localhost',
   user: 'root',
-  password: 'Alireza1380#',
+  password: '',
   database: 'franumbot_db',
   charset: 'utf8mb4'
 };

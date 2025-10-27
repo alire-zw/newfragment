@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { UserService } from '../../../../../database/UserService';
+import { requireAuth, requireOwnership, handleAuthError } from '@/utils/auth';
 
 export async function POST(request: NextRequest) {
   try {
+    // 🔒 احراز هویت
+    const authenticatedUserId = await requireAuth(request);
+
     const body = await request.json();
     const { userID, userFullName, userTelegramID, userBirthDate, userNationalID, userPhoneNumber, isVerified } = body;
 
@@ -12,6 +16,13 @@ export async function POST(request: NextRequest) {
         { error: 'اطلاعات ضروری کاربر ناقص است' },
         { status: 400 }
       );
+    }
+
+    // 🔒 چک کردن اینکه کاربر فقط اطلاعات خودش را ذخیره کند
+    // برای کاربر جدید، فقط بررسی می‌کنیم که authenticatedUserId با userTelegramID یکی باشد
+    if (authenticatedUserId !== userTelegramID) {
+      // اگر کاربر در حال ذخیره اطلاعات شخص دیگری است، بررسی دسترسی ادمین
+      await requireOwnership(request, parseInt(userTelegramID), true);
     }
 
     // ذخیره یا بروزرسانی کاربر
@@ -34,14 +45,15 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
+    const { message, status } = handleAuthError(error);
     console.error('❌ خطا در ذخیره کاربر:', error);
     
     return NextResponse.json(
       { 
-        error: 'خطا در ذخیره اطلاعات کاربر',
+        error: message,
         details: error instanceof Error ? error.message : 'خطای نامشخص'
       },
-      { status: 500 }
+      { status }
     );
   }
 }

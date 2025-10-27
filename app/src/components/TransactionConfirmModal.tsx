@@ -34,9 +34,9 @@ export default function TransactionConfirmModal({
   price,
   loading = false
 }: TransactionConfirmModalProps) {
-  // کلیدهای پیش‌فرض
-  const defaultMnemonic = 'quantum castle lecture range tourist lunch slam early daring innocent sword metal shuffle push thumb hurdle pet hockey rotate carry involve pumpkin head february';
-  const defaultApiKey = '6cb7852c6bfb7e962fb9a3c1e370e17cd77591fef381daedb07dbc627986008b';
+  // کلیدهای از environment variables - بدون مقدار پیش‌فرض
+  const defaultMnemonic = process.env.NEXT_PUBLIC_TON_WALLET_MNEMONIC || '';
+  const defaultApiKey = process.env.NEXT_PUBLIC_TON_API_KEY || '';
   
   const [mnemonic, setMnemonic] = useState(defaultMnemonic);
   const [apiKey, setApiKey] = useState(defaultApiKey);
@@ -60,19 +60,14 @@ export default function TransactionConfirmModal({
         throw new Error('کلیدهای ولت باید 24 کلمه باشد');
       }
 
-      const response = await fetch('/api/telegram/confirm-transaction', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          transaction,
-          mnemonic: mnemonicArray,
-          apiKey: apiKey.trim()
-        })
+      // استفاده از apiPost
+      const { apiPost } = await import('@/utils/api');
+      
+      const result = await apiPost('/api/telegram/confirm-transaction', {
+        transaction,
+        mnemonic: mnemonicArray,
+        apiKey: apiKey.trim()
       });
-
-      const result = await response.json();
 
       if (result.success) {
         onConfirm();
@@ -82,7 +77,7 @@ export default function TransactionConfirmModal({
       }
     } catch (error) {
       console.error('Confirm transaction error:', error);
-      setError('خطا در ارسال درخواست');
+      setError(error instanceof Error ? error.message : 'خطا در ارسال درخواست');
     } finally {
       setConfirmLoading(false);
     }

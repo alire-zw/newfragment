@@ -108,21 +108,14 @@ export default function VerifyPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/users/verify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nationalId: nationalId.trim(),
-          phoneNumber: phoneNumber.replace(/\D/g, ''),
-          telegramId: userInfo?.id
-        }),
+      const { apiPost } = await import('@/utils/api');
+      const data = await apiPost<any>('/api/users/verify', {
+        nationalId: nationalId.trim(),
+        phoneNumber: phoneNumber.replace(/\D/g, ''),
+        telegramId: userInfo?.id
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (data) {
         if (data.verified) {
           setShowSuccessModal(true);
         } else {

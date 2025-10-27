@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { StarsPurchaseService } from '../../../../../database/StarsPurchaseService';
+import { StarsPurchaseService } from '@/database/StarsPurchaseService';
 
 export async function GET(
   request: NextRequest,

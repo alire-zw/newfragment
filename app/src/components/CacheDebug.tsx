@@ -17,8 +17,8 @@ export default function CacheDebug() {
   const checkCache = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/cache/clear?key=prices_1');
-      const data = await response.json();
+      const { apiGet } = await import('@/utils/api');
+      const data = await apiGet<any>('/api/cache/clear?key=prices_1');
       
       if (data.success) {
         setCacheInfo(data.data);
@@ -36,10 +36,8 @@ export default function CacheDebug() {
   const clearCache = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/cache/clear?key=prices_1', {
-        method: 'POST'
-      });
-      const data = await response.json();
+      const { apiPost } = await import('@/utils/api');
+      const data = await apiPost<any>('/api/cache/clear?key=prices_1', {});
       setMessage(data.message);
       setCacheInfo(null);
     } catch (error) {
@@ -52,10 +50,8 @@ export default function CacheDebug() {
   const clearAllCache = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/cache/clear', {
-        method: 'POST'
-      });
-      const data = await response.json();
+      const { apiPost } = await import('@/utils/api');
+      const data = await apiPost<any>('/api/cache/clear', {});
       setMessage(data.message);
       setCacheInfo(null);
     } catch (error) {

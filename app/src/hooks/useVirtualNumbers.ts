@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiGet } from '@/utils/api';
 
 export interface Country {
   id: string;
@@ -32,19 +33,7 @@ export const useVirtualNumbers = (serviceId: number = 1) => {
         setError(null);
 
         const url = `${API_BASE_URL}/prices/${serviceId}?token=${AUTH_TOKEN}`;
-
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data: ApiResponse = await response.json();
+        const data = await apiGet<ApiResponse>(url);
 
         if (data.success) {
           setCountries(data.data);
@@ -85,21 +74,8 @@ export const useVirtualNumbers = (serviceId: number = 1) => {
       // دوباره fetch کردن
       const fetchCountries = async () => {
         try {
-          const response = await fetch(
-            `${API_BASE_URL}/prices/${serviceId}?token=${AUTH_TOKEN}`,
-            {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const data: ApiResponse = await response.json();
+          const url = `${API_BASE_URL}/prices/${serviceId}?token=${AUTH_TOKEN}`;
+          const data = await apiGet<ApiResponse>(url);
 
           if (data.success) {
             setCountries(data.data);

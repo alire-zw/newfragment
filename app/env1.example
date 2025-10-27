@@ -1,0 +1,53 @@
+# Sample ENV file — copy keys to your .env and set real values
+
+# — Telegram —
+# One of these must be set (for Telegram initData signature)
+TELEGRAM_BOT_TOKEN=8200827364:AAGVkmbDAHNBrIY31deTelKzbQ1Rob5Y2KE
+BOT_TOKEN=8200827364:AAGVkmbDAHNBrIY31deTelKzbQ1Rob5Y2KE
+BOT_USERNAME=FragmentParsiBot
+MINI_APP_NAME=FragmentParsi
+
+# — Mini App —
+MINI_APP_URL=https://app.numberstar.shop
+
+# — Webhook (optional) —
+WEBHOOK_URL=http://localhost:3000/api
+
+# — Database —
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=Alireza1380#
+DB_NAME=franumbot_db
+
+# — Referral —
+REFERRAL_REWARD_PERCENTAGE=25.00
+REFERRAL_MIN_REWARD_AMOUNT=1000
+
+# — Payment (Zibal) —
+ZIBAL_MERCHANT=zibal
+ZIBAL_BASE_URL=https://gateway.zibal.ir/v1
+ZIBAL_START_URL=https://gateway.zibal.ir/start
+ZIBAL_MERCHANT_SANDBOX=zibal
+ZIBAL_BASE_URL_SANDBOX=https://gateway.zibal.ir/v1
+ZIBAL_START_URL_SANDBOX=https://gateway.zibal.ir/start
+
+# — Runtime —
+# development | production
+NODE_ENV=development
+ENVIRONMENT=development
+
+# Security note: do NOT commit real secrets; set them only on server/hosting.
+TON_WALLET_MNEMONIC="example skirt mixed faith purity exact jar dad collect slice prize pole sail fatal rookie hunt early explain piece cross wrist organ soccer bottom"
+TON_API_KEY="6cb7852c6bfb7e962fb9a3c1e370e17cd77591fef381daedb07dbc627986008b"
+TON_DEFAULT_ADDRESS="UQBwD9i5KzLLqnOSLEli2XASema8pcyeJ7mmK7FB3UY35zQm"
+NEXT_PUBLIC_TON_WALLET_MNEMONIC="example skirt mixed faith purity exact jar dad collect slice prize pole sail fatal rookie hunt early explain piece cross wrist organ soccer bottom"
+NEXT_PUBLIC_TON_API_KEY="6cb7852c6bfb7e962fb9a3c1e370e17cd77591fef381daedb07dbc627986008b"
+MARKETAPP_SESSION="eyJsb2NhbGUiOiAiZW4iLCAidG9uX3Byb29mIjogIjM5ZmRkYjA1NDVhMjhkNDYiLCAiYWRkcmVzcyI6ICIwOjcwMGZkOGI5MmIzMmNiYWE3MzkyMmM0OTYyZDk3MDEyN2E2NmJjYTVjYzllMjdiOWE2MmJiMTQxZGQ0NjM3ZTciLCAicmVmIjogImNBX1l1U3N5eTZwemtpeEpZdGx3RW5wbXZLWE1uaWU1cGl1eFFkMUdOLWM9IiwgImRuc19yZWNvcmQiOiAiIiwgImFwcF9uYW1lIjogInRvbmtlZXBlciB3aW5kb3dzIiwgIm1heF9tZXNzYWdlcyI6IDR9.aP1AVA.hkYebsmfsVt3vMj66_cWOifI1BI"
+MARKETAPP_YM_UID="1759356516526866044"
+MARKETAPP_YM_D="1761427522"
+MARKETAPP_YM_ISAD="2"
+MARKETAPP_YM_VISORC="w"
+MARKETAPP_JS_P="525,1800,0,0,0"
+MARKETAPP_JHASH="861"
+MARKETAPP_JUA="Mozilla%2F5.0%20%28Windows%20NT%2010.0%3B%20Win64%3B%20x64%3B%20rv%3A144.0%29%20Gecko%2F20100101%20Firefox%2F144.0"
+MARKETAPP_HASH="1f07f1fcaff276528794f0f3b008bf81"

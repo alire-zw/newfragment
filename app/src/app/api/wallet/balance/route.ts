@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../../../database/connection';
 import { WalletService } from '../../../../../database/WalletService';
+import { requireAuth, requireOwnership, handleAuthError } from '@/utils/auth';
 
 export async function GET(request: NextRequest) {
   let connection;
   
   try {
+    // 🔒 احراز هویت
+    const authenticatedUserId = await requireAuth(request);
+
     const { searchParams } = new URL(request.url);
     const telegramId = searchParams.get('telegramId');
 
@@ -15,6 +19,9 @@ export async function GET(request: NextRequest) {
         error: 'شناسه تلگرام الزامی است'
       }, { status: 400 });
     }
+
+    // 🔒 چک کردن اینکه کاربر فقط موجودی خودش را ببیند (یا ادمین باشد)
+    await requireOwnership(request, parseInt(telegramId), true);
 
     // اتصال به دیتابیس
     connection = await pool.getConnection();
@@ -87,11 +94,12 @@ export async function GET(request: NextRequest) {
     }
 
   } catch (error) {
+    const { message, status } = handleAuthError(error);
     console.error('❌ Error fetching wallet balance:', error);
     return NextResponse.json({
       success: false,
-      error: 'خطا در دریافت موجودی کیف پول'
-    }, { status: 500 });
+      error: message
+    }, { status });
   } finally {
     if (connection) {
       connection.release();

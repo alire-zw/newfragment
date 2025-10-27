@@ -84,12 +84,31 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // استعلام کارت بانکی با کد ملی
-      const cardCheckResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/verify/card-check`, {
+      // استعلام کارت بانکی با کد ملی (ساخت امن origin از روی هدرهای درخواست)
+      const forwardedProto = request.headers.get('x-forwarded-proto') || 'http';
+      const forwardedHost = request.headers.get('x-forwarded-host') || request.headers.get('host');
+      const origin = forwardedHost ? `${forwardedProto}://${forwardedHost}` : request.nextUrl.origin;
+      const baseUrlFromEnv = process.env.NEXT_PUBLIC_BASE_URL;
+      const baseUrl = baseUrlFromEnv && /^https?:\/\//.test(baseUrlFromEnv)
+        ? baseUrlFromEnv.replace(/\/$/, '')
+        : origin;
+
+      // فوروارد احراز هویت تلگرام به درخواست داخلی
+      const initDataHeader = request.headers.get('X-Telegram-Init-Data')
+        || request.nextUrl.searchParams.get('_auth')
+        || request.cookies.get('tg_init_data')?.value
+        || '';
+
+      const cardCheckHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (initDataHeader) {
+        cardCheckHeaders['X-Telegram-Init-Data'] = initDataHeader;
+      }
+
+      const cardCheckResponse = await fetch(`${baseUrl}/api/verify/card-check`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: cardCheckHeaders,
         body: JSON.stringify({
           nationalCode: user.userNationalID,
           birthDate: finalBirthDate,

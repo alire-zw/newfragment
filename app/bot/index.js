@@ -255,14 +255,52 @@ bot.catch((err, ctx) => {
 });
 
 // راه‌اندازی ربات
-bot.launch().then(() => {
-  console.log('🤖 ربات تلگرام راه‌اندازی شد!');
-  console.log(`📱 نام ربات: ${botConfig.botUsername}`);
-  console.log(`🌐 مینی اپ: ${botConfig.miniAppName}`);
-  console.log(`🔗 لینک مینی اپ: ${botConfig.miniAppUrl}`);
-}).catch((err) => {
-  console.error('❌ خطا در راه‌اندازی ربات:', err);
-});
+async function startBot() {
+  let retryCount = 0;
+  const maxRetries = 3;
+  
+  while (retryCount < maxRetries) {
+    try {
+      console.log(`🔄 تلاش ${retryCount + 1} برای راه‌اندازی ربات...`);
+      
+      // راه‌اندازی ربات
+      await bot.launch();
+      
+      console.log('🤖 ربات تلگرام راه‌اندازی شد!');
+      console.log(`📱 نام ربات: ${botConfig.botUsername}`);
+      console.log(`🌐 مینی اپ: ${botConfig.miniAppName}`);
+      console.log(`🔗 لینک مینی اپ: ${botConfig.miniAppUrl}`);
+      
+      // اگر موفق شد، از حلقه خارج شو
+      break;
+      
+    } catch (err) {
+      console.error('❌ خطا در راه‌اندازی ربات:', err);
+      
+      // اگر خطای 409 (Conflict) بود، کمی صبر کن و دوباره تلاش کن
+      if (err.response && err.response.error_code === 409) {
+        retryCount++;
+        if (retryCount < maxRetries) {
+          const waitTime = retryCount * 10; // 10, 20, 30 ثانیه
+          console.log(`⏳ صبر کردن ${waitTime} ثانیه برای حل تداخل... (تلاش ${retryCount}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
+        } else {
+          console.error('❌ حداکثر تعداد تلاش‌ها به پایان رسید. ربات راه‌اندازی نشد.');
+          process.exit(1);
+        }
+      } else {
+        // برای خطاهای دیگر، فوراً خروج کن
+        console.error('❌ خطای غیرقابل حل در راه‌اندازی ربات');
+        process.exit(1);
+      }
+    }
+  }
+}
+
+// صبر کردن 2 ثانیه قبل از شروع
+setTimeout(() => {
+  startBot();
+}, 2000);
 
 // Graceful shutdown
 process.once('SIGINT', () => bot.stop('SIGINT'));

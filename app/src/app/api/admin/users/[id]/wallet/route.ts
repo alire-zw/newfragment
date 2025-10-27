@@ -1,8 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { WalletService } from '../../../../../../../database/WalletService';
+import { requireAdmin, handleAuthError } from '@/utils/auth';
+import { logAudit, getRequestMetadata } from '@/utils/audit';
+import { strictRateLimit } from '@/utils/rateLimit';
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // 🔒 احراز هویت و چک دسترسی ادمین
+    const adminId = await requireAdmin(request);
+
+    // 🔒 Rate limiting
+    const canProceed = await strictRateLimit(`admin:wallet:${adminId}`);
+    if (!canProceed) {
+      return NextResponse.json(
+        { success: false, error: 'تعداد درخواست‌های شما بیش از حد مجاز است' },
+        { status: 429 }
+      );
+    }
+
     const { id } = await params;
     const userTelegramID = parseInt(id);
     
@@ -41,9 +56,27 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, error: 'Failed to update wallet balance' }, { status: 500 });
     }
 
+    // 📝 ثبت لاگ Audit
+    const metadata = getRequestMetadata(request);
+    await logAudit({
+      userId: adminId,
+      action: 'admin.update_wallet',
+      resourceType: 'wallet',
+      resourceId: userTelegramID.toString(),
+      details: { newBalance: balance, targetUserId: userTelegramID },
+      ...metadata
+    });
+
+    console.log('✅ [ADMIN] Wallet updated by admin:', {
+      adminId,
+      targetUserId: userTelegramID,
+      newBalance: balance
+    });
+
     return NextResponse.json({ success: true, message: 'Wallet balance updated successfully' });
   } catch (error) {
+    const { message, status } = handleAuthError(error);
     console.error('Error updating wallet balance:', error);
-    return NextResponse.json({ success: false, error: 'Failed to update wallet balance' }, { status: 500 });
+    return NextResponse.json({ success: false, error: message }, { status });
   }
 }

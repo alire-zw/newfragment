@@ -139,55 +139,73 @@ export default function Header() {
           
           <div 
             className="flex items-center px-2 py-0.5 rounded-lg cursor-pointer hover:opacity-80 transition-opacity" 
-            style={{ direction: 'ltr', gap: '6px', backgroundColor: '#293440', height: '32px' }}
+            style={{ direction: 'rtl', gap: '6px', backgroundColor: '#293440', height: '32px' }}
             onClick={() => router.push('/profile')}
           >
           {loading ? (
             <div className="w-6 h-6 bg-gray-600 rounded-full animate-pulse"></div>
           ) : error ? (
-            <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs">!</span>
+            <div className="text-right">
+              <h1 
+                className="text-white font-bold text-sm whitespace-nowrap" 
+                style={{ 
+                  fontFamily: 'ProductSansRegular, ProductSans, IRANYekanMobileBold, IRANYekan, tahoma, Arial, sans-serif'
+                }}
+              >
+                با تلگرام وارد شوید
+              </h1>
             </div>
           ) : userInfo ? (
-            <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center overflow-hidden">
-              {userInfo.photo_url ? (
-                <Image 
-                  src={userInfo.photo_url} 
-                  alt="Profile" 
-                  width={24}
-                  height={24}
-                  className="w-6 h-6 rounded-full object-cover"
-                  loading="lazy"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    const parent = target.parentElement;
-                    if (parent) {
-                      const fallback = parent.querySelector('.fallback-text');
-                      if (fallback) {
-                        (fallback as HTMLElement).style.display = 'block';
+            <>
+              <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center overflow-hidden">
+                {userInfo.photo_url ? (
+                  <Image 
+                    src={userInfo.photo_url} 
+                    alt="Profile" 
+                    width={24}
+                    height={24}
+                    className="w-6 h-6 rounded-full object-cover"
+                    loading="lazy"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent) {
+                        const fallback = parent.querySelector('.fallback-text');
+                        if (fallback) {
+                          (fallback as HTMLElement).style.display = 'block';
+                        }
                       }
-                    }
+                    }}
+                  />
+                ) : null}
+                <span className="fallback-text text-white font-medium text-sm" style={{ display: userInfo.photo_url ? 'none' : 'block' }}>
+                  {userInfo.first_name.charAt(0)}
+                </span>
+              </div>
+              <div className="text-right">
+                <h1 
+                  className="text-white font-bold text-sm" 
+                  style={{ 
+                    fontFamily: 'ProductSansRegular, ProductSans, IRANYekanMobileBold, IRANYekan, tahoma, Arial, sans-serif'
                   }}
-                />
-              ) : null}
-              <span className="fallback-text text-white font-medium text-sm" style={{ display: userInfo.photo_url ? 'none' : 'block' }}>
-                {userInfo.first_name.charAt(0)}
-              </span>
-            </div>
+                >
+                  {`${userInfo.first_name} ${userInfo.last_name || ''}`}
+                </h1>
+              </div>
+            </>
           ) : (
-            <div className="w-8 h-8 bg-gray-600 rounded-full"></div>
+            <div className="text-right">
+              <h1 
+                className="text-white font-bold text-sm whitespace-nowrap" 
+                style={{ 
+                  fontFamily: 'ProductSansRegular, ProductSans, IRANYekanMobileBold, IRANYekan, tahoma, Arial, sans-serif'
+                }}
+              >
+                با تلگرام وارد شوید
+              </h1>
+            </div>
           )}
-          <div className="text-left">
-            <h1 
-              className="text-white font-bold text-sm" 
-              style={{ 
-                fontFamily: 'ProductSansRegular, ProductSans, IRANYekanMobileBold, IRANYekan, tahoma, Arial, sans-serif'
-              }}
-            >
-              {loading ? '...' : error ? 'خطا' : userInfo ? `${userInfo.first_name} ${userInfo.last_name || ''}` : 'کاربر'}
-            </h1>
-          </div>
           </div>
         </div>
 

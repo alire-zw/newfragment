@@ -48,19 +48,20 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ [PREMIUM-PRICE] Input validation passed');
 
-    // کوکی‌های بروزرسانی شده
+    // کوکی‌های بروزرسانی شده با مقادیر مستقیم
     const cookies = [
-      '__lhash_=f2fc97f9d2b9cc83b86382599686fc18',
-      'session=eyJsb2NhbGUiOiAiZW4iLCAidG9uX3Byb29mIjogIjlkZTRjYzk4MGVmMzE0YWMiLCAiYWRkcmVzcyI6ICIwOmExYzVhYTNjZDhiOGZkMTczZGRmMGM2M2EwMTczZDc2NTMwMTdiYjRhZmJkNjM3NGY0ZWRlMDdkOGQ5YzI5MGMiLCAicmVmIjogIm9jV3FQTmk0X1JjOTN3eGpvQmM5ZGxNQmU3U3Z2V04wOU8zZ2ZZMmNLUXc9IiwgImRuc19yZWNvcmQiOiAiIiwgImFwcF9uYW1lIjogInRvbmtlZXBlciB3aW5kb3dzIiwgIm1heF9tZXNzYWdlcyI6IDR9.aMliQg.X9stX8yG8JTVNjxXNCfMUUGRW0I',
-      '_ym_uid=1755247663760478843',
-      '_ym_d=1757629548',
-      '__js_p_=222,1800,0,0,0',
-      '__jhash_=552',
-      '__jua_=Mozilla%2F5.0%20%28Windows%20NT%2010.0%3B%20Win64%3B%20x64%3B%20rv%3A142.0%29%20Gecko%2F20100101%20Firefox%2F142.0',
-      '__hash_=50d685215ffa13109798b882e1e6ec9b',
-      '_ym_isad=2',
-      '_ym_visorc=w'
+      `session=eyJsb2NhbGUiOiAiZW4iLCAidG9uX3Byb29mIjogIjM5ZmRkYjA1NDVhMjhkNDYiLCAiYWRkcmVzcyI6ICIwOjcwMGZkOGI5MmIzMmNiYWE3MzkyMmM0OTYyZDk3MDEyN2E2NmJjYTVjYzllMjdiOWE2MmJiMTQxZGQ0NjM3ZTciLCAicmVmIjogImNBX1l1U3N5eTZwemtpeEpZdGx3RW5wbXZLWE1uaWU1cGl1eFFkMUdOLWM9IiwgImRuc19yZWNvcmQiOiAiIiwgImFwcF9uYW1lIjogInRvbmtlZXBlciB3aW5kb3dzIiwgIm1heF9tZXNzYWdlcyI6IDR9.aP603g.9u4n9oH59ND22OyKagKXcqLomhY`,
+      `_ym_uid=1759356516526866044`,
+      `_ym_d=1761427522`,
+      `_ym_isad=2`,
+      `_ym_visorc=w`,
+      `__js_p_=898,1800,0,0,0`,
+      `__jhash_=508`,
+      `__jua_=Mozilla%2F5.0%20%28Windows%20NT%2010.0%3B%20Win64%3B%20x64%3B%20rv%3A144.0%29%20Gecko%2F20100101%20Firefox%2F144.0`,
+      `__hash_=1f07f1fcaffb566dc794f0f3b008bf81`
     ].join('; ');
+    
+    console.log('🍪 [PREMIUM-PRICE] Using cookies:', cookies.substring(0, 100) + '...');
 
     // درخواست به API قیمت پریمیوم
     console.log('🚀 [PREMIUM-PRICE] Calling external API...');

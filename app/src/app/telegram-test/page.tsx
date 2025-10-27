@@ -26,15 +26,8 @@ export default function TelegramTestPage() {
     setResult(null);
 
     try {
-      const response = await fetch('/api/telegram/username', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username: username.trim() })
-      });
-
-      const data = await response.json();
+      const { apiPost } = await import('@/utils/api');
+      const data = await apiPost<any>('/api/telegram/username', { username: username.trim() });
       setResult(data);
       } catch {
       setResult({

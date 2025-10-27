@@ -2,9 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../../../database/connection';
 import { WalletService } from '../../../../../database/WalletService';
 import { VirtualNumberService } from '../../../../services/VirtualNumberService';
+import { requireAuth, requireOwnership, handleAuthError } from '@/utils/auth';
+import { logAudit, getRequestMetadata } from '@/utils/audit';
+import { purchaseRateLimit } from '@/utils/rateLimit';
 
 export async function POST(request: NextRequest) {
   try {
+    // 🔒 احراز هویت
+    const authenticatedUserId = await requireAuth(request);
+
     const body = await request.json();
     const { 
       userTelegramID, 
@@ -19,6 +25,18 @@ export async function POST(request: NextRequest) {
         success: false,
         message: 'پارامترهای لازم ارسال نشده است'
       }, { status: 400 });
+    }
+
+    // 🔒 چک کردن اینکه کاربر فقط برای خودش خرید کند
+    await requireOwnership(request, parseInt(userTelegramID), false);
+
+    // 🔒 Rate limiting برای خریدها
+    const canProceed = await purchaseRateLimit(`purchase:virtual-number:${authenticatedUserId}`);
+    if (!canProceed) {
+      return NextResponse.json({
+        success: false,
+        message: 'تعداد درخواست‌های شما بیش از حد مجاز است. لطفاً کمی صبر کنید.'
+      }, { status: 429 });
     }
 
       // دریافت شماره مجازی از API خارجی
@@ -144,6 +162,27 @@ export async function POST(request: NextRequest) {
       // تأیید تراکنش
       await conn.commit();
 
+      // 📝 ثبت لاگ Audit
+      const metadata = getRequestMetadata(request);
+      await logAudit({
+        userId: parseInt(userTelegramID),
+        action: 'purchase.virtual_number',
+        resourceType: 'virtual_number',
+        resourceId: virtualNumberID,
+        details: { 
+          number: virtualNumberData.number, 
+          country: countryName, 
+          price: virtualNumberData.price 
+        },
+        ...metadata
+      });
+
+      console.log('✅ [VIRTUAL-NUMBER] Purchase completed:', {
+        userId: userTelegramID,
+        virtualNumberID,
+        number: virtualNumberData.number
+      });
+
       return NextResponse.json({
         success: true,
         message: 'شماره مجازی با موفقیت خریداری شد',
@@ -168,11 +207,12 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
+    const { message, status } = handleAuthError(error);
     console.error('خطا در خرید شماره مجازی:', error);
     
     return NextResponse.json({
       success: false,
-      message: error instanceof Error ? error.message : 'خطای داخلی سرور'
-    }, { status: 500 });
+      message: error instanceof Error ? error.message : message
+    }, { status: error instanceof Error && (error.message.includes('احراز هویت') || error.message.includes('دسترسی')) ? status : 500 });
   }
 }

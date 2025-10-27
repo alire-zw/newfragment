@@ -1,16 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../../../database/connection';
+import { requireAdmin, handleAuthError } from '@/utils/auth';
+import { logAudit, getRequestMetadata } from '@/utils/audit';
 
 // دریافت تمام تنظیمات سیستم
-export async function GET() {
+export async function GET(request: NextRequest) {
   let connection;
   
   try {
+    // 🔒 احراز هویت و چک دسترسی ادمین
+    const adminId = await requireAdmin(request);
+
     connection = await pool.getConnection();
     
     const [rows] = await connection.execute(
       'SELECT * FROM system_settings ORDER BY setting_key'
     );
+
+    console.log('✅ [ADMIN] Settings viewed by admin:', adminId);
     
     return NextResponse.json({
       success: true,
@@ -18,10 +25,11 @@ export async function GET() {
     });
     
   } catch (error) {
+    const { message, status } = handleAuthError(error);
     console.error('❌ خطا در دریافت تنظیمات سیستم:', error);
     return NextResponse.json(
-      { success: false, error: 'خطا در دریافت تنظیمات سیستم' },
-      { status: 500 }
+      { success: false, error: message },
+      { status }
     );
   } finally {
     if (connection) connection.release();
@@ -33,6 +41,9 @@ export async function PUT(request: NextRequest) {
   let connection;
   
   try {
+    // 🔒 احراز هویت و چک دسترسی ادمین
+    const adminId = await requireAdmin(request);
+
     const { settings } = await request.json();
     
     if (!settings || !Array.isArray(settings)) {
@@ -78,6 +89,18 @@ export async function PUT(request: NextRequest) {
       
       // تایید تراکنش
       await connection.commit();
+
+      // 📝 ثبت لاگ Audit
+      const metadata = getRequestMetadata(request);
+      await logAudit({
+        userId: adminId,
+        action: 'admin.update_settings',
+        resourceType: 'system_settings',
+        details: { settings },
+        ...metadata
+      });
+
+      console.log('✅ [ADMIN] Settings updated by admin:', adminId);
       
       return NextResponse.json({
         success: true,

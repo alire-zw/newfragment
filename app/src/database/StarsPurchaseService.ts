@@ -2,6 +2,7 @@ import pool from './connection';
 
 export interface StarsPurchaseData {
   id?: number;
+  purchaseID?: string;
   userID: string;
   userTelegramID: number;
   recipient: string;
@@ -17,7 +18,7 @@ export interface StarsPurchaseData {
   paymentAddress?: string;
   paymentAmount?: string;
   paymentPayload?: string;
-  successPageId?: string; // شناسه منحصر به فرد برای صفحه success
+  successPageId?: string;
   metadata?: any;
   createdAt?: Date;
   completedAt?: Date;
@@ -25,18 +26,34 @@ export interface StarsPurchaseData {
 }
 
 export class StarsPurchaseService {
-  // ایجاد خرید استارز جدید
   static async createPurchase(purchaseData: Omit<StarsPurchaseData, 'id' | 'createdAt' | 'updatedAt'>): Promise<StarsPurchaseData> {
     const connection = await pool.getConnection();
     
     try {
+      // تشخیص داینامیک نام ستون‌های گیرنده برای سازگاری با نسخه‌های مختلف اسکیما
+      const [columnsRows] = await connection.query(
+        `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'stars_purchases'`
+      );
+      const columnNames = new Set((columnsRows as any[]).map(r => r.COLUMN_NAME));
+      const useRecipientPrefixed = columnNames.has('recipientUsername') && columnNames.has('recipientName');
+
+      const columnsSql = useRecipientPrefixed
+        ? `purchaseID, userID, userTelegramID, recipient, recipientUsername, recipientName,
+            quantity, price, priceInRials, status, transactionID, externalTransactionID,
+            validUntil, paymentAddress, paymentAmount, paymentPayload, successPageId, metadata`
+        : `purchaseID, userID, userTelegramID, recipient, username, name,
+            quantity, price, priceInRials, status, transactionID, externalTransactionID,
+            validUntil, paymentAddress, paymentAmount, paymentPayload, successPageId, metadata`;
+
+      const insertSql = `INSERT INTO stars_purchases (
+          ${columnsSql}
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
       const [result] = await connection.execute(
-        `INSERT INTO stars_purchases (
-          userID, userTelegramID, recipient, username, name,
-          quantity, price, priceInRials, status, transactionID, externalTransactionID,
-          validUntil, paymentAddress, paymentAmount, paymentPayload, successPageId, metadata
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        insertSql,
         [
+          purchaseData.purchaseID,
           purchaseData.userID,
           purchaseData.userTelegramID,
           purchaseData.recipient,
@@ -72,7 +89,6 @@ export class StarsPurchaseService {
     }
   }
 
-  // جستجوی خرید بر اساس successPageId
   static async getPurchaseBySuccessPageId(successPageId: string): Promise<StarsPurchaseData | null> {
     const connection = await pool.getConnection();
     
@@ -92,7 +108,6 @@ export class StarsPurchaseService {
     }
   }
 
-  // بررسی وجود خرید تکراری در 5 دقیقه گذشته
   static async checkDuplicatePurchase(
     userTelegramID: number, 
     recipient: string, 
@@ -125,7 +140,6 @@ export class StarsPurchaseService {
     }
   }
 
-  // بروزرسانی وضعیت خرید
   static async updatePurchaseStatus(
     purchaseID: string, 
     status: 'pending' | 'completed' | 'failed' | 'cancelled',
@@ -175,7 +189,7 @@ export class StarsPurchaseService {
         updateQuery += ', completedAt = NOW()';
       }
 
-      updateQuery += ', updatedAt = NOW() WHERE id = ?';
+      updateQuery += ', updatedAt = NOW() WHERE purchaseID = ?';
       updateParams.push(purchaseID);
 
       const [result] = await connection.execute(updateQuery, updateParams);
@@ -189,13 +203,12 @@ export class StarsPurchaseService {
     }
   }
 
-  // دریافت خرید بر اساس شناسه
   static async getPurchaseByID(purchaseID: string): Promise<StarsPurchaseData | null> {
     const connection = await pool.getConnection();
     
     try {
       const [purchases] = await connection.execute(
-        'SELECT * FROM stars_purchases WHERE id = ?',
+        'SELECT * FROM stars_purchases WHERE purchaseID = ?',
         [purchaseID]
       );
 
@@ -209,7 +222,6 @@ export class StarsPurchaseService {
     }
   }
 
-  // دریافت خریدهای کاربر
   static async getUserPurchases(
     userTelegramID: number, 
     limit: number = 50, 
@@ -235,7 +247,6 @@ export class StarsPurchaseService {
     }
   }
 
-  // حذف خریدهای قدیمی (بیش از 30 روز)
   static async cleanupOldPurchases(): Promise<number> {
     const connection = await pool.getConnection();
     

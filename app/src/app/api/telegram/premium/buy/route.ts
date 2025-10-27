@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../../../../database/connection';
 import { WalletService } from '../../../../../../database/WalletService';
 import TONWalletService from '../.../../../../../../services/WalletService';
+import { requireAuth, requireOwnership, handleAuthError } from '@/utils/auth';
+import { logAudit, getRequestMetadata } from '@/utils/audit';
+import { purchaseRateLimit } from '@/utils/rateLimit';
 
 interface PremiumBuyRequest {
   recipient: string;
@@ -35,9 +38,24 @@ export async function POST(request: NextRequest) {
   
   try {
     console.log('🚀 [PREMIUM-BUY] Starting premium purchase request');
+
+    // 🔒 احراز هویت
+    const authenticatedUserId = await requireAuth(request);
     
     const body: PremiumBuyRequest = await request.json();
     const { recipient, username, name, months, userTelegramID, price } = body;
+
+    // 🔒 چک کردن اینکه کاربر فقط برای خودش خرید کند
+    await requireOwnership(request, userTelegramID, false);
+
+    // 🔒 Rate limiting برای خریدها
+    const canProceed = await purchaseRateLimit(`purchase:premium:${authenticatedUserId}`);
+    if (!canProceed) {
+      return NextResponse.json({
+        success: false,
+        error: 'تعداد درخواست‌های شما بیش از حد مجاز است. لطفاً کمی صبر کنید.'
+      } as PremiumBuyResponse, { status: 429 });
+    }
 
     console.log('📥 [PREMIUM-BUY] Request data:', {
       recipient: recipient,
@@ -160,20 +178,13 @@ export async function POST(request: NextRequest) {
       console.log('🔓 [PREMIUM-BUY] Database connection released');
     }
 
-    // کوکی‌های بروزرسانی شده
+    // کوکی‌های بروزرسانی شده از cookieManager
     console.log('🌐 [PREMIUM-BUY] Preparing external API request...');
-    const cookies = [
-      '__lhash_=f2fc97f9d2b9cc83b86382599686fc18',
-      'session=eyJsb2NhbGUiOiAiZW4iLCAidG9uX3Byb29mIjogIjlkZTRjYzk4MGVmMzE0YWMiLCAiYWRkcmVzcyI6ICIwOmExYzVhYTNjZDhiOGZkMTczZGRmMGM2M2EwMTczZDc2NTMwMTdiYjRhZmJkNjM3NGY0ZWRlMDdkOGQ5YzI5MGMiLCAicmVmIjogIm9jV3FQTmk0X1JjOTN3eGpvQmM5ZGxNQmU3U3Z2V04wOU8zZ2ZZMmNLUXc9IiwgImRuc19yZWNvcmQiOiAiIiwgImFwcF9uYW1lIjogInRvbmtlZXBlciB3aW5kb3dzIiwgIm1heF9tZXNzYWdlcyI6IDR9.aMliQg.X9stX8yG8JTVNjxXNCfMUUGRW0I',
-      '_ym_uid=1755247663760478843',
-      '_ym_d=1757629548',
-      '__js_p_=222,1800,0,0,0',
-      '__jhash_=552',
-      '__jua_=Mozilla%2F5.0%20%28Windows%20NT%2010.0%3B%20Win64%3B%20x64%3B%20rv%3A142.0%29%20Gecko%2F20100101%20Firefox%2F142.0',
-      '__hash_=50d685215ffa13109798b882e1e6ec9b',
-      '_ym_isad=2',
-      '_ym_visorc=w'
-    ].join('; ');
+    const { getCurrentCookies, cookiesToString } = await import('@/utils/cookieManager');
+    const currentCookies = getCurrentCookies();
+    const cookies = cookiesToString(currentCookies);
+    
+    console.log('🍪 [PREMIUM-BUY] Using cookies:', cookies.substring(0, 100) + '...');
 
     // درخواست به API خرید پریمیوم
     console.log('🚀 [PREMIUM-BUY] Calling external API...');
@@ -206,7 +217,7 @@ export async function POST(request: NextRequest) {
           'Sec-Fetch-Mode': 'cors',
           'Sec-Fetch-Site': 'same-origin',
           'TE': 'trailers',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:142.0) Gecko/20100101 Firefox/142.0'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:144.0) Gecko/20100101 Firefox/144.0'
         },
         body: JSON.stringify({
           recipient: recipient.trim(),
@@ -262,6 +273,40 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ [PREMIUM-BUY] External API call successful');
+    
+    // Check if response is HTML instead of JSON
+    const contentType = response.headers.get('content-type');
+    console.log('🔍 [PREMIUM-BUY] Response content-type:', contentType);
+    
+    if (contentType && contentType.includes('text/html')) {
+      const htmlText = await response.text();
+      console.log('⚠️ [PREMIUM-BUY] Received HTML response instead of JSON');
+      console.log('📄 [PREMIUM-BUY] HTML response preview:', htmlText.substring(0, 200) + '...');
+      
+      // Check for common error patterns in HTML
+      if (htmlText.includes('Unknown Error') || htmlText.includes('Error')) {
+        console.error('❌ [PREMIUM-BUY] Server returned error page');
+        return NextResponse.json({
+          success: false,
+          error: 'سرور خطا برمی‌گرداند. لطفاً دوباره تلاش کنید.'
+        } as PremiumBuyResponse, { status: 500 });
+      }
+      
+      if (htmlText.includes('Rate limit') || htmlText.includes('Too many requests')) {
+        console.error('❌ [PREMIUM-BUY] Rate limited');
+        return NextResponse.json({
+          success: false,
+          error: 'تعداد درخواست‌ها بیش از حد مجاز است. لطفاً کمی صبر کنید.'
+        } as PremiumBuyResponse, { status: 429 });
+      }
+      
+      console.error('❌ [PREMIUM-BUY] Unexpected HTML response');
+      return NextResponse.json({
+        success: false,
+        error: 'سرور پاسخ غیرمنتظره برمی‌گرداند. لطفاً دوباره تلاش کنید.'
+      } as PremiumBuyResponse, { status: 500 });
+    }
+    
     console.log('📥 [PREMIUM-BUY] Parsing response JSON...');
     const data = await response.json();
     console.log('📥 [PREMIUM-BUY] External API response data:', {
@@ -280,22 +325,6 @@ export async function POST(request: NextRequest) {
         amount: message.amount,
         payloadLength: message.payload?.length || 0
       });
-      
-      // تایید تراکنش در ولت
-      console.log('🔧 [PREMIUM-BUY] Confirming transaction in wallet...');
-      const walletService = new TONWalletService();
-      const confirmResult = await walletService.confirmPremiumTransaction({
-        address: message.address,
-        amount: message.amount,
-        payload: message.payload
-      });
-      
-      if (!confirmResult.success) {
-        console.error('❌ [PREMIUM-BUY] Wallet confirmation failed:', confirmResult.error);
-        throw new Error(`تایید تراکنش در ولت ناموفق: ${confirmResult.error}`);
-      }
-      
-      console.log('✅ [PREMIUM-BUY] Wallet confirmation successful');
       
       // شروع تراکنش دیتابیس برای کسر موجودی و بروزرسانی وضعیت
       const conn = await pool.getConnection();
@@ -323,6 +352,22 @@ export async function POST(request: NextRequest) {
         }
 
         console.log('✅ [PREMIUM-BUY] Balance subtracted successfully');
+        
+        // تایید تراکنش در ولت (بعد از کسر موجودی)
+        console.log('🔧 [PREMIUM-BUY] Confirming transaction in wallet...');
+        const walletService = new TONWalletService();
+        const confirmResult = await walletService.confirmPremiumTransaction({
+          address: message.address,
+          amount: message.amount,
+          payload: message.payload
+        });
+        
+        if (!confirmResult.success) {
+          console.error('❌ [PREMIUM-BUY] Wallet confirmation failed:', confirmResult.error);
+          throw new Error(`تایید تراکنش در ولت ناموفق: ${confirmResult.error}`);
+        }
+        
+        console.log('✅ [PREMIUM-BUY] Wallet confirmation successful');
 
         // ثبت تراکنش خرید پریمیوم
         const transactionID = `PREMIUM_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -376,6 +421,18 @@ export async function POST(request: NextRequest) {
 
         // تأیید تراکنش دیتابیس
         await conn.commit();
+
+        // 📝 ثبت لاگ Audit
+        const metadata = getRequestMetadata(request);
+        await logAudit({
+          userId: userTelegramID,
+          action: 'purchase.premium',
+          resourceType: 'premium_purchase',
+          resourceId: purchaseID,
+          details: { months, price, recipient, username, name },
+          ...metadata
+        });
+
         console.log('✅ [PREMIUM-BUY] Purchase status updated to completed');
         console.log('🎉 [PREMIUM-BUY] Premium purchase completed successfully');
         
@@ -383,6 +440,19 @@ export async function POST(request: NextRequest) {
         // برگشت تراکنش در صورت خطا
         console.error('❌ [PREMIUM-BUY] Database transaction failed, rolling back:', error);
         await conn.rollback();
+        
+        // اگر خطا در تایید تراکنش TON بود، موجودی را برگردان
+        if (error instanceof Error && error.message.includes('تایید تراکنش در ولت ناموفق')) {
+          console.log('🔄 [PREMIUM-BUY] Refunding balance due to wallet confirmation failure...');
+          try {
+            const priceInRials = price * 10; // تبدیل تومان به ریال
+            await WalletService.addBalance(userTelegramID, priceInRials);
+            console.log('✅ [PREMIUM-BUY] Balance refunded successfully');
+          } catch (refundError) {
+            console.error('❌ [PREMIUM-BUY] Failed to refund balance:', refundError);
+          }
+        }
+        
         throw error;
       } finally {
         conn.release();
@@ -422,6 +492,7 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
+    const { message, status } = handleAuthError(error);
     console.error('💥 [PREMIUM-BUY] Unexpected error:', {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined
@@ -447,9 +518,10 @@ export async function POST(request: NextRequest) {
     }
     
     console.error('❌ [PREMIUM-BUY] Premium purchase failed');
+    const { message: errorMessage, status: errorStatus } = handleAuthError(error);
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : 'خطای داخلی سرور'
-    } as PremiumBuyResponse, { status: 500 });
+      error: error instanceof Error ? error.message : errorMessage
+    } as PremiumBuyResponse, { status: error instanceof Error && (error.message.includes('احراز هویت') || error.message.includes('دسترسی')) ? errorStatus : 500 });
   }
 }

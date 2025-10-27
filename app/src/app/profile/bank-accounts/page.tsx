@@ -52,17 +52,11 @@ export default function BankAccountsPage() {
   const fetchBankAccounts = useCallback(async () => {
     try {
       setLoadingAccounts(true);
-      const response = await fetch('/api/bank-accounts/get', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          telegramId: userInfo?.id
-        })
+      const { apiPost } = await import('@/utils/api');
+      const data = await apiPost<any>('/api/bank-accounts/get', {
+        telegramId: userInfo?.id
       });
-
-      const data = await response.json();
+      
       if (data.success) {
         setBankAccounts(data.accounts || []);
       }
@@ -202,20 +196,14 @@ export default function BankAccountsPage() {
     try {
       setIsSubmitting(true);
       
-      const response = await fetch('/api/bank-accounts/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          cardNumber: cardNumber,
-          birthDate: convertJalaliToGregorian(birthYear, birthMonth, birthDay), // برای اعتبارسنجی سن
-          jalaliDate: `${birthYear}/${birthMonth}/${birthDay}`, // تاریخ شمسی برای ذخیره
-          telegramId: userInfo?.id
-        })
+      const { apiPost } = await import('@/utils/api');
+      const data = await apiPost<any>('/api/bank-accounts/add', {
+        cardNumber: cardNumber,
+        birthDate: convertJalaliToGregorian(birthYear, birthMonth, birthDay), // برای اعتبارسنجی سن
+        jalaliDate: `${birthYear}/${birthMonth}/${birthDay}`, // تاریخ شمسی برای ذخیره
+        telegramId: userInfo?.id
       });
-
-      const data = await response.json();
+      
       console.log('پاسخ API:', data);
       
       if (data.success) {
@@ -278,18 +266,8 @@ export default function BankAccountsPage() {
     if (!accountToDelete) return;
 
     try {
-      const response = await fetch('/api/bank-accounts/delete', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          accountId: accountToDelete,
-          telegramId: userInfo?.id
-        })
-      });
-
-      const data = await response.json();
+      const { apiDelete } = await import('@/utils/api');
+      const data = await apiDelete<any>(`/api/bank-accounts/delete?accountId=${accountToDelete}&telegramId=${userInfo?.id}`);
       
       if (data.success) {
         showNotification('حساب بانکی با موفقیت حذف شد', 'success');

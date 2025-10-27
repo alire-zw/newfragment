@@ -74,21 +74,23 @@ export default function PremiumPage() {
   useEffect(() => {
     const fetchProfitPercentages = async () => {
       try {
-        const response = await fetch('/api/admin/settings');
-        const data = await response.json();
+        const { apiGet } = await import('@/utils/api');
+        const data = await apiGet<any>('/api/settings/public');
         
         if (data.success) {
           const percentages: {[key: string]: number} = {};
-          data.data.forEach((setting: any) => {
-            if (setting.setting_key.startsWith('premium_') && setting.setting_key.includes('_profit_percentage')) {
-              const months = setting.setting_key.includes('3_month') ? '3' : 
-                           setting.setting_key.includes('6_month') ? '6' : 
-                           setting.setting_key.includes('12_month') ? '12' : '';
-              if (months) {
-                percentages[months] = parseFloat(setting.setting_value) || 0;
-              }
-            }
-          });
+          
+          // دریافت درصدهای سود پریمیوم
+          if (data.data.premium_3_month_profit_percentage) {
+            percentages['3'] = parseFloat(data.data.premium_3_month_profit_percentage) || 0;
+          }
+          if (data.data.premium_6_month_profit_percentage) {
+            percentages['6'] = parseFloat(data.data.premium_6_month_profit_percentage) || 0;
+          }
+          if (data.data.premium_12_month_profit_percentage) {
+            percentages['12'] = parseFloat(data.data.premium_12_month_profit_percentage) || 0;
+          }
+          
           setProfitPercentages(percentages);
         }
       } catch (error) {
@@ -103,9 +105,10 @@ export default function PremiumPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const { apiGet } = await import('@/utils/api');
+        
         // Fetch premium prices
-        const priceResponse = await fetch('/api/telegram/premium-price');
-        const priceData = await priceResponse.json();
+        const priceData = await apiGet<any>('/api/telegram/premium-price');
         
         if (priceData.success && priceData.data) {
           setPriceData(priceData.data);
@@ -118,8 +121,7 @@ export default function PremiumPage() {
         }
 
         // Fetch TON to Toman rate
-        const tonResponse = await fetch('/api/telegram/convert-price');
-        const tonData = await tonResponse.json();
+        const tonData = await apiGet<any>('/api/telegram/convert-price');
         
         if (tonData.success && tonData.data) {
           setTonToTomanRate(tonData.data.tomanPrice);
@@ -167,18 +169,11 @@ export default function PremiumPage() {
     setIsSearching(true);
     setUserSearchLoading(true);
     try {
-      const response = await fetch('/api/telegram/premium/recipient', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          username: username.trim(),
-          months: months
-        })
+      const { apiPost } = await import('@/utils/api');
+      const data = await apiPost<any>('/api/telegram/premium/recipient', { 
+        username: username.trim(),
+        months: months
       });
-
-      const data = await response.json();
       
       if (data.success && data.data) {
         setFoundUser({
@@ -309,22 +304,15 @@ export default function PremiumPage() {
     setShowConfirmModal(false);
 
     try {
-      const response = await fetch('/api/telegram/premium/buy', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          recipient: foundUser.recipient,
-          username: foundUser.username,
-          name: foundUser.name,
-          months: pendingPurchase.months,
-          userTelegramID: userInfo.id,
-          price: pendingPurchase.price
-        })
+      const { apiPost } = await import('@/utils/api');
+      const result = await apiPost<any>('/api/telegram/premium/buy', {
+        recipient: foundUser.recipient,
+        username: foundUser.username,
+        name: foundUser.name,
+        months: pendingPurchase.months,
+        userTelegramID: userInfo.id,
+        price: pendingPurchase.price
       });
-
-      const result = await response.json();
       
       if (result.success && result.data?.transaction?.messages?.length > 0) {
         // هدایت به صفحه موفقیت با اطلاعات تراکنش
@@ -523,7 +511,7 @@ export default function PremiumPage() {
                   <div className="flex items-center gap-1">
                     <Cash01Icon className="h-4 w-4" style={{ color: 'var(--field-accent-color)' }} />
                     <span className="font-semibold text-sm text-white">
-                      {priceLoading ? '...' : getPackagePrice(pkg.months) ? getPackagePrice(pkg.months)!.tomanPrice.toLocaleString('en-US') : '...'}
+                      {priceLoading ? '...' : getPackagePrice(pkg.months) ? Math.floor(getPackagePrice(pkg.months)!.tomanPrice).toLocaleString('en-US') : '...'}
                     </span>
                     <span className="text-xs" style={{ color: 'var(--text-color)' }}>
                       تومان
@@ -571,7 +559,7 @@ export default function PremiumPage() {
         {/* Transaction History Link */}
         <div className="text-center">
           <a 
-            href="/transactions" 
+            href="/history" 
             className="text-sm transition-colors duration-200"
             style={{ color: 'var(--field-accent-color)' }}
           >

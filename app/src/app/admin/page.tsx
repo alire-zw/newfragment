@@ -91,8 +91,8 @@ export default function AdminPanel() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('/api/admin/stats');
-        const data = await response.json();
+        const { apiGet } = await import('@/utils/api');
+        const data = await apiGet<any>('/api/admin/stats');
         
         if (data.success) {
           setStats(data.data);
@@ -130,7 +130,7 @@ export default function AdminPanel() {
   }, [isAdmin]);
 
   const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('fa-IR').format(num);
+    return new Intl.NumberFormat('fa-IR').format(Math.floor(num));
   };
 
   // تنظیم padding بر اساس نوع دستگاه
@@ -350,7 +350,7 @@ export default function AdminPanel() {
                <div className={styles.referralStatContent}>
                  <div className={styles.referralStatLabel}>موجودی کیف پول</div>
                  <div className={styles.referralStatValue}>
-                   {statsLoading ? '...' : `${formatNumber(stats.totalWalletBalance)} تومان`}
+                   {statsLoading ? '...' : `${formatNumber(stats.totalWalletBalance / 10)} تومان`}
                  </div>
                </div>
              </div>
@@ -365,7 +365,7 @@ export default function AdminPanel() {
                <div className={styles.referralStatContent}>
                  <div className={styles.referralStatLabel}>کل واریزی‌ها</div>
                  <div className={styles.referralStatValue}>
-                   {statsLoading ? '...' : `${formatNumber(stats.totalDeposits)} تومان`}
+                   {statsLoading ? '...' : `${formatNumber(stats.totalDeposits / 10)} تومان`}
                  </div>
                </div>
              </div>

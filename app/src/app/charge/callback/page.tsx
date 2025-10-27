@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { isTelegramWebApp, getTelegramWebApp } from '@/utils/telegram';
 import CheckmarkIcon from '../../../../public/icons/checkmark-icon';
 import Cash01Icon from '../../../../public/icons/cash-01-stroke-rounded';
 
@@ -19,11 +20,16 @@ function PaymentCallbackContent() {
     const amountParam = searchParams.get('amount');
     const trackIdParam = searchParams.get('trackId');
 
+    console.log('🔍 Callback params:', { success, error, amountParam, trackIdParam });
+
     if (success === 'true' && amountParam) {
       setStatus('success');
       setAmount(parseInt(amountParam));
       setTrackId(trackIdParam);
-      setMessage(`پرداخت تومان ${formatAmount(Math.floor(parseInt(amountParam) / 10))} با موفقیت انجام شد!`);
+      setMessage(`پرداخت ${formatAmount(parseInt(amountParam))} تومان با موفقیت انجام شد!`);
+      
+      // Trigger wallet update event
+      window.dispatchEvent(new CustomEvent('walletUpdated'));
     } else if (error) {
       setStatus('error');
       setMessage(getErrorMessage(error));
@@ -31,7 +37,7 @@ function PaymentCallbackContent() {
       setStatus('error');
       setMessage('خطا در پردازش پرداخت');
     }
-  }, [searchParams, router]);
+  }, [searchParams]);
 
   const formatAmount = (amount: number): string => {
     return new Intl.NumberFormat('fa-IR').format(amount);
@@ -51,11 +57,29 @@ function PaymentCallbackContent() {
   };
 
   const handleBackToCharge = () => {
-    router.push('/charge');
+    if (isTelegramWebApp()) {
+      // در مینی اپ تلگرام، به ربات برگرد
+      const tg = getTelegramWebApp();
+      if (tg && typeof tg.close === 'function') {
+        tg.close();
+      }
+    } else {
+      // در مرورگر عادی، به صفحه شارژ برگرد
+      router.push('/charge');
+    }
   };
 
   const handleViewHistory = () => {
-    router.push('/history');
+    if (isTelegramWebApp()) {
+      // در مینی اپ تلگرام، به ربات برگرد
+      const tg = getTelegramWebApp();
+      if (tg && typeof tg.close === 'function') {
+        tg.close();
+      }
+    } else {
+      // در مرورگر عادی، به صفحه تاریخچه برگرد
+      router.push('/history');
+    }
   };
 
   if (status === 'loading') {
@@ -92,6 +116,11 @@ function PaymentCallbackContent() {
             <p className="text-sm text-gray-400">
               {status === 'success' ? 'شارژ حساب با موفقیت تکمیل شد' : 'پرداخت انجام نشد'}
             </p>
+            {isTelegramWebApp() && status === 'success' && (
+              <p className="text-xs text-blue-400 mt-2">
+                در حال بازگشت به ربات تلگرام...
+              </p>
+            )}
           </div>
 
           {/* Transaction Details */}
@@ -176,7 +205,7 @@ function PaymentCallbackContent() {
                 border: `1px solid var(--field-accent-color)`
               }}
             >
-              {status === 'success' ? 'شارژ مجدد' : 'تلاش مجدد'}
+              {isTelegramWebApp() ? 'بازگشت به ربات' : (status === 'success' ? 'شارژ مجدد' : 'تلاش مجدد')}
             </button>
             
             <button
@@ -187,7 +216,7 @@ function PaymentCallbackContent() {
                 border: '1px solid var(--border-color)'
               }}
             >
-              مشاهده تاریخچه تراکنش‌ها
+              {isTelegramWebApp() ? 'مشاهده تاریخچه' : 'مشاهده تاریخچه تراکنش‌ها'}
             </button>
           </div>
 
