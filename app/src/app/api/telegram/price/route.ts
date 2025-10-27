@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Cookies with direct values
-    const cookies = getCurrentCookies();
+    const cookies = await getCurrentCookies();
     const cookieString = cookiesToString(cookies);
     
     console.log('🍪 [PRICE-API] Using cookies:', cookieString.substring(0, 100) + '...');

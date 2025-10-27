@@ -11,17 +11,21 @@
     "bot:start": "cd bot && npm start",
     "bot:dev": "cd bot && npm run dev",
     "app:dev": "next dev --turbopack -p 6592",
-    "app:start": "next start -p 6592"
+    "app:start": "next start -p 6592",
+    "cookie-service": "tsx src/services/cookieServiceMain.ts",
+    "migrate": "tsx src/database/runMigrations.ts"
   },
   "dependencies": {
     "@ton/crypto": "^3.3.0",
     "@ton/ton": "^13.11.2",
     "@types/uuid": "^10.0.0",
+    "axios": "^1.12.2",
     "dotenv": "^17.2.2",
     "moment-jalaali": "^0.10.4",
     "mysql2": "^3.14.5",
     "next": "15.5.2",
     "node-fetch": "^3.3.2",
+    "puppeteer": "^24.26.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "uuid": "^12.0.0"
@@ -37,6 +41,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
     "tailwindcss": "^4",
+    "tsx": "^4.19.2",
     "typescript": "^5"
   }
 }

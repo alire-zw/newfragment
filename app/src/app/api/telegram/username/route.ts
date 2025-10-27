@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     console.log(`Checking Telegram username: ${cleanUsername}`);
 
     // استفاده از کوکی‌های به‌روز از cookieManager
-    const cookies = getCurrentCookies();
+    const cookies = await getCurrentCookies();
     const cookieString = cookiesToString(cookies);
     
     console.log('🍪 [USERNAME-API] Using updated cookies:', cookieString.substring(0, 100) + '...');

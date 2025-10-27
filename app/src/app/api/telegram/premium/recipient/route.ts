@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     console.log('✅ [PREMIUM-RECIPIENT] Input validation passed');
 
     // استفاده از کوکی‌های به‌روز از cookieManager
-    const cookies = getCurrentCookies();
+    const cookies = await getCurrentCookies();
     const cookieString = cookiesToString(cookies);
     
     console.log('🍪 [PREMIUM-RECIPIENT] Using updated cookies:', cookieString.substring(0, 100) + '...');

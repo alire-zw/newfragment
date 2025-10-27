@@ -264,7 +264,7 @@ export async function POST(request: NextRequest) {
     // کوکی‌های بروزرسانی شده از cookieManager
     console.log('🌐 [STARS-BUY] Preparing external API request...');
     const { getCurrentCookies, cookiesToString } = await import('@/utils/cookieManager');
-    const currentCookies = getCurrentCookies();
+    const currentCookies = await getCurrentCookies();
     const cookies = cookiesToString(currentCookies);
     
     console.log('🍪 [STARS-BUY] Using cookies:', cookies.substring(0, 100) + '...');
